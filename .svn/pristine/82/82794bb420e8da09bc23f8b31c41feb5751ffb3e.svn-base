@@ -1,0 +1,373 @@
+package com.brs.batch;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.brs.entities.BrsBankStatementLineStg;
+import com.brs.entities.BrsConsoldtStg;
+import com.brs.entities.BrsConsotUpdateStg;
+import com.brs.entities.BrsEbsStg;
+import com.brs.entities.BrsError;
+import com.brs.repository.BrsErrorRepository;
+import com.brs.service.BrsBankStmtService;
+import com.brs.service.BrsDataService;
+import com.brs.service.BrsEbsStgService;
+import com.brs.service.BrsUpdateStgService;
+import com.brs.util.AppConstants;
+import com.brs.util.BrsDataUtil;
+
+public class BrsDataItemProcessor implements ItemProcessor<BrsConsoldtStg, List<BrsConsoldtStg>> {
+
+	Logger log = LoggerFactory.getLogger(BrsDataItemProcessor.class);
+
+	@Autowired
+	private BrsDataService brsDataService;
+
+	@Autowired
+	private BrsBankStmtService brsBankStmtService;
+
+	@Autowired
+	private BrsUpdateStgService brsUpdateStgService;
+
+	@Autowired
+	private BrsEbsStgService brsEbsService;
+
+	@Autowired
+	private BrsDataUtil util;
+	
+	@Autowired
+	private BrsErrorRepository errorRepo;
+
+	@Override
+	public List<BrsConsoldtStg> process(BrsConsoldtStg brsData) {
+
+		log.info("Input to ItemProcessor {}", brsData.getUniqueRef() +" | "+brsData.getBankAcNo()+" | "+brsData.getPaymentMode()+" | "+brsData.getCrAmt()+" | "+brsData.getDrAmt()+" | "+brsData.getVoucherDate());
+
+		List<BrsConsoldtStg> bookStmtList = null;
+		List<BrsBankStatementLineStg> bankStmtList = null;
+		List<BrsEbsStg> brsEbsList = null;
+
+		BrsConsotUpdateStg brsUpdateStg = null;
+
+		String paymentMode = brsData.getPaymentMode();
+//		String uniqueRefNo = util.genUniqueReference(brsData);
+		String uniqueRefNo = brsData.getUniqueRef();
+		String bankAcNo = brsData.getBankAcNo();
+
+		Long chequeId = brsData.getCheqId();
+
+		boolean loadFlag = false;
+		
+		Long refId=brsData.getId();
+		
+		try {
+	
+			/**
+			 * If the payment mode is not present in the staging table then we marked this
+			 * book entry as unreconciled
+			 */
+			if (paymentMode == null || paymentMode.equals("")) {
+				
+				log.info("paymentMode null ");
+				brsData.setStatus(AppConstants.UNRECONCILED);
+				brsData.setErrorMsg(AppConstants.PAYMENTMODEERR);
+	
+				bookStmtList = new ArrayList<BrsConsoldtStg>();
+				bookStmtList.add(brsData);
+				brsEbsList = util.getBrsEBSList(bookStmtList, AppConstants.UNRECONCILED, AppConstants.PAYMENTMODEERR, "",util.getBkcRefId());
+	
+				if (brsEbsList != null && !brsEbsList.isEmpty()) {
+					brsEbsService.saveEbsList(brsEbsList);
+				}
+	
+				return bookStmtList;
+			}
+	
+			if (uniqueRefNo == null || uniqueRefNo.equals("")) {
+				log.info("uniqueRefNo null ");
+				/**
+				 * If unique ref num is missing in staging table then we need to pick cheque id
+				 * column in staging table and compare it the cheque id with update table, if
+				 * cheque id is also missing then mark is as unreconciled
+				 */
+				if (chequeId == null || chequeId == 0) {
+					brsData.setStatus(AppConstants.UNRECONCILED);
+					brsData.setErrorMsg(AppConstants.CHEQUEIDERR);
+	
+					bookStmtList = new ArrayList<BrsConsoldtStg>();
+					bookStmtList.add(brsData);
+					brsEbsList = util.getBrsEBSList(bookStmtList, AppConstants.UNRECONCILED, AppConstants.CHEQUEIDERR, "",util.getBkcRefId());
+	
+					if (brsEbsList != null && !brsEbsList.isEmpty()) {
+						brsEbsService.saveEbsList(brsEbsList);
+					}
+					return bookStmtList;
+				}
+	
+				/**
+				 * Fetching unique ref from update table using cheque id of the staging column
+				 * if we are not getting records from update table using cheque id then mark
+				 * this records as unreconciled
+				 */
+				brsUpdateStg = brsUpdateStgService.getBrsUpdateStgData(chequeId);
+	
+				if (brsUpdateStg != null) {
+					uniqueRefNo = util.updateUniqueRef(brsData, brsUpdateStg);
+	
+					if (uniqueRefNo == null) {
+	
+						brsData.setStatus(AppConstants.UNRECONCILED);
+						brsData.setErrorMsg(AppConstants.UNQREFNOTADDEDERR);
+	
+						bookStmtList = new ArrayList<BrsConsoldtStg>();
+						bookStmtList.add(brsData);
+						brsEbsList = util.getBrsEBSList(bookStmtList, AppConstants.UNRECONCILED,AppConstants.UNQREFNOTADDEDERR, "", util.getBkcRefId());
+	
+						if (brsEbsList != null && !brsEbsList.isEmpty()) {
+							brsEbsService.saveEbsList(brsEbsList);
+						}
+						return bookStmtList;
+					}
+	
+					/**
+					 * As unique ref is not present in staging table so we are fetching unique ref
+					 * from update table so rest of book entries of staging table will be fetched
+					 * from cheque id and unique number will be updated
+					 */
+					bookStmtList = brsDataService.getBrsRecordsByChequeId(chequeId);
+					loadFlag = true;
+					for (BrsConsoldtStg obj : bookStmtList) {
+						util.updateUniqueRef(obj, brsUpdateStg);
+					}
+	
+				} else {
+					brsData.setStatus(AppConstants.UNRECONCILED);
+					brsData.setErrorMsg(AppConstants.UNQREFNOTFOUNDERR);
+	
+					bookStmtList = new ArrayList<BrsConsoldtStg>();
+					bookStmtList.add(brsData);
+					brsEbsList = util.getBrsEBSList(bookStmtList, AppConstants.UNRECONCILED, AppConstants.UNQREFNOTFOUNDERR,"", util.getBkcRefId());
+	
+					if (brsEbsList != null && !brsEbsList.isEmpty()) {
+						brsEbsService.saveEbsList(brsEbsList);
+					}
+	
+					return bookStmtList;
+				}
+			}
+	
+			/**
+			 * if rest of book entry is not loaded using cheque id then we load using the
+			 * unique ref.
+			 */
+			if (!loadFlag) {
+				bookStmtList = brsDataService.getOtherRecords(paymentMode, uniqueRefNo,bankAcNo);
+			}
+	
+			log.info("Book Enteries with matching unq ref : "+bookStmtList.size());
+	
+			/**
+			 * If bank account no. is missing in the staging table then we will mark this as
+			 * unreconciled
+			 */
+			if (bankAcNo == null || bankAcNo.equals("")) {
+				String unmatchNum = util.getBkcRefId();
+				log.info("bankAcNo null ,UNMATCH NUMBER : {}", unmatchNum);
+				for (BrsConsoldtStg book : bookStmtList) {
+					book.setStatus(AppConstants.UNRECONCILED);
+					book.setErrorMsg(AppConstants.BANKACNOERR);
+					book.setUnmatchRef(unmatchNum);
+				}
+				brsEbsList = util.getBrsEBSList(bookStmtList, AppConstants.UNRECONCILED, AppConstants.BANKACNOERR, "",unmatchNum);
+				if (brsEbsList != null && !brsEbsList.isEmpty()) {
+					brsEbsService.saveEbsList(brsEbsList);
+				}
+				return bookStmtList;
+			}
+	
+			/**
+			 * Check unique ref from unreconciled records of ebs stg table using bank
+			 * account and unique ref
+			 */
+	
+			List<BrsEbsStg> ebsBankList = brsEbsService.getBrsEbsStgData(uniqueRefNo, bankAcNo, "Bank");
+	
+			/**
+			 * Load unreconciled book enteries from EBS table as well by matching unique ref
+			 * and bank account no
+			 */
+			List<BrsEbsStg> ebsBookList = brsEbsService.getBrsEbsStgData(uniqueRefNo, bankAcNo, "Book");
+	
+			/**
+			 * Checking and loading bank statement records based on unique ref in book
+			 * staging table make sure loading only unprocessed records, becuasse we are
+			 * reading processed records from ebs table unreconciled
+			 */
+			bankStmtList = brsBankStmtService.getBrsBankStmtData(uniqueRefNo, bankAcNo, "N");
+			
+			
+			log.info("ebsBankList : "+ebsBankList.size());
+			log.info("ebsBookList : "+ebsBookList.size());
+			log.info("bankStmtList : "+bankStmtList.size());
+	
+			if ((bankStmtList == null || bankStmtList.isEmpty()) && (ebsBankList == null || ebsBankList.isEmpty())) {
+				
+				
+				String unmatchNum = util.getBkcRefId();
+				brsEbsList = util.getBrsEBSList(bookStmtList, AppConstants.UNRECONCILED, AppConstants.BANKSTMTNOTFOUND, "",unmatchNum);
+				log.info("NO BANK RECORD , UNMATCH NUMBER : {}", unmatchNum);
+				
+				for (BrsConsoldtStg book : bookStmtList) {
+					book.setStatus(AppConstants.UNRECONCILED);
+					book.setErrorMsg(AppConstants.BANKSTMTNOTFOUND);
+					book.setUnmatchRef(unmatchNum);
+				}
+	//			bookStmtList.forEach(bs -> bs.setStatus(AppConstants.UNRECONCILED));
+	//			bookStmtList.forEach(bs -> bs.setErrorMsg(AppConstants.BANKSTMTNOTFOUND));
+	//			bookStmtList.forEach(bs -> bs.setUnmatchRef(unmatchNum));
+				
+				if (brsEbsList != null && !brsEbsList.isEmpty()) {
+					brsEbsService.saveEbsList(brsEbsList);
+				}
+				
+				return bookStmtList;
+			}
+	
+	//		log.info("Bank Statement Records : {}", bankStmtList);
+	
+			/**
+			 * Sum of the CRAMT and DRAMT of book statement and same need to be compared
+			 * with the sum of amount in bank statement data
+			 */
+	
+			double sumOfCrAmt = 0;
+			double sumOfDrAmt = 0;
+			double sumOfBankAmt = 0;
+	
+			for (BrsConsoldtStg book : bookStmtList) {
+				sumOfCrAmt = sumOfCrAmt + book.getCrAmt();
+				sumOfDrAmt = sumOfDrAmt + book.getDrAmt();
+			}
+	
+			for (BrsEbsStg ebsbook : ebsBookList) {
+				sumOfCrAmt = sumOfCrAmt + ebsbook.getCrAmt();
+				sumOfDrAmt = sumOfDrAmt + ebsbook.getDrAmt();
+			}
+	
+			for (BrsBankStatementLineStg bank : bankStmtList) {
+				sumOfBankAmt = sumOfBankAmt + bank.getAmount();
+			}
+	
+			for (BrsEbsStg ebsbank : ebsBankList) {
+				sumOfBankAmt = sumOfBankAmt + ebsbank.getAmount();
+			}
+	
+			if (sumOfCrAmt != 0 && sumOfCrAmt == sumOfBankAmt) {
+	
+				String matchNum = util.getMtchRefId();
+				log.info("CR AMT MATCH NUMBER : {}", matchNum);
+	
+				// Record match , Match01
+				brsEbsList = util.getBrsEBSList(bookStmtList, "Reconciled", " ", matchNum, "");
+				brsEbsList.addAll(util.getBrsEBSListForBank(bankStmtList, "Reconciled", " ", matchNum, ""));
+	
+				if (ebsBookList != null && !ebsBookList.isEmpty()) {
+	
+					for (BrsEbsStg ebs : ebsBookList) {
+						ebs.setStatus(AppConstants.RECONCILED);
+						ebs.setErrorMsg("");
+						ebs.setLastUpdateDate(new Date());
+						ebs.setMatchRef(matchNum);
+					}
+	
+					brsEbsList.addAll(ebsBookList);
+				}
+	
+				if (ebsBankList != null && !ebsBankList.isEmpty()) {
+					for (BrsEbsStg ebs : ebsBankList) {
+						ebs.setStatus(AppConstants.RECONCILED);
+						ebs.setErrorMsg("");
+						ebs.setLastUpdateDate(new Date());
+						ebs.setMatchRef(matchNum);
+					}
+					brsEbsList.addAll(ebsBankList);
+				}
+	
+			} else if (sumOfDrAmt != 0 && sumOfDrAmt == sumOfBankAmt) {
+				String matchNum = util.getMtchRefId();
+				log.info("DR AMT MATCH NUMBER : {}", matchNum);
+				brsEbsList = util.getBrsEBSList(bookStmtList, "Reconciled", " ", matchNum, "");
+				
+				System.out.println("BF EBS LIST "+brsEbsList.size());
+	//			System.out.println("BF BOOK STMT LIST "+bookStmtList.size());
+				
+				brsEbsList.addAll(util.getBrsEBSListForBank(bankStmtList, "Reconciled", " ", matchNum, ""));
+				
+				System.out.println("AF EBS LIST "+brsEbsList.size());
+	//			System.out.println("AF BOOK STMT LIST "+bookStmtList.size());
+	
+				if (ebsBookList != null && !ebsBookList.isEmpty()) {
+					for (BrsEbsStg ebs : ebsBookList) {
+						ebs.setStatus(AppConstants.RECONCILED);
+						ebs.setErrorMsg(" ");
+						ebs.setLastUpdateDate(new Date());
+						ebs.setMatchRef(matchNum);
+					}
+	
+					brsEbsList.addAll(ebsBookList);
+				}
+	
+				if (ebsBankList != null && !ebsBankList.isEmpty()) {
+					for (BrsEbsStg ebs : ebsBankList) {
+						ebs.setStatus(AppConstants.RECONCILED);
+						ebs.setErrorMsg("");
+						ebs.setLastUpdateDate(new Date());
+						ebs.setMatchRef(matchNum);
+					}
+					brsEbsList.addAll(ebsBankList);
+				}
+	
+			} else {
+				String unmatchNum = util.getUnmtchRefId();
+				log.info("NOT MATCHED WITH BANK ACCOUNT, UNMATCH NUMBER : {}", unmatchNum);
+	
+				brsEbsList = util.getBrsEBSList(bookStmtList, "Unreconciled", "Amount not matched.", "", unmatchNum);
+				brsEbsList.addAll(util.getBrsEBSListForBank(bankStmtList, "Unreconciled", "Amount not matched.", "", unmatchNum));
+			}
+	
+			if (brsEbsList != null && !brsEbsList.isEmpty()) {
+				log.info("brsEbsList : "+brsEbsList.size());
+	//			log.info("brsEbsList : "+brsEbsList);
+				
+				try {
+					brsEbsService.saveEbsList(brsEbsList);
+				}catch(Exception e) {
+					e.printStackTrace();
+					System.out.println("INSIDE EXCEPTION OF EBS LIST SAVE");
+				}
+			}
+			
+			System.out.println("AFTER EBS BRS LIST EXECUTION...");
+			if (bankStmtList != null && !bankStmtList.isEmpty()) {
+				System.out.println("INSIDE BANK STMT UPDATE");
+				bankStmtList.forEach(bs -> bs.setProcessFlag("Y")); // update bank statement process flag
+				brsBankStmtService.saveBankList(bankStmtList);
+			}
+			System.out.println("BEFORE RETURN CALL OF BOOK");
+		
+		}catch(Exception e) {
+			BrsError error=util.getErrorDetails("Book", refId, bankAcNo, uniqueRefNo, e.getMessage());
+			errorRepo.save(error);
+			log.error(error.toString(), e);
+		}
+		
+		return bookStmtList;
+	}
+
+}

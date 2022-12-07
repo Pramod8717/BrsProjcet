@@ -1,0 +1,11 @@
+package com.brs.service;
+
+import java.util.List;
+
+import com.brs.entities.BrsValidateStg;
+
+public interface BrsValidateStgService {
+	
+	List<BrsValidateStg> saveValidateList(List<BrsValidateStg> brsValidateList);
+
+}

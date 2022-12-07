@@ -1,0 +1,293 @@
+package com.brs.batch;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobExecutionListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.brs.entities.BrsBankStatementLineStg;
+import com.brs.entities.BrsConsoldtStg;
+import com.brs.entities.BrsConsotUpdateStg;
+import com.brs.entities.BrsEbsStg;
+import com.brs.entities.BrsError;
+import com.brs.service.BrsBankStmtService;
+import com.brs.service.BrsDataService;
+import com.brs.service.BrsEbsStgService;
+import com.brs.service.BrsErrorService;
+import com.brs.service.BrsUpdateStgService;
+import com.brs.util.AppConstants;
+import com.brs.util.BrsDataUtil;
+
+@Component
+public class JobExecListener implements JobExecutionListener {
+
+	Logger log = LoggerFactory.getLogger(JobExecListener.class);
+
+	@Autowired
+	private BrsBankStmtService bnkService;
+
+	@Autowired
+	private BrsEbsStgService ebsService;
+
+	@Autowired
+	private BrsUpdateStgService updateStgService;
+
+	@Autowired
+	private BrsDataService brsStgService;
+
+	@Autowired
+	private BrsDataUtil util;
+	
+	@Autowired
+	private BrsErrorService errorService;
+
+	@Override
+	public void beforeJob(JobExecution jobExecution) {
+		log.info(":::::::::Before job Process execution::::::::::");
+		
+		BrsError error=util.getErrorDetails("Tetsting1", 007L, "Tetsting3", "Tetsting4","Tetsting5");
+		errorService.saveError(error);
+		
+		/**
+		List<BrsEbsStg> unreconciledEbsBookList = ebsService.getUnreconciledBookEntries("Book",
+				AppConstants.UNRECONCILED);
+		if (unreconciledEbsBookList != null && !unreconciledEbsBookList.isEmpty()) {
+			for (BrsEbsStg ebs : unreconciledEbsBookList) {
+				if (ebs.getUniqueRef() == null || "".equals(ebs.getUniqueRef())) {
+					BrsConsotUpdateStg brsUpdate = updateStgService.getBrsUpdateStgData(ebs.getCheqId());
+					List<BrsConsoldtStg> brsConsolStgList = brsStgService.getBrsRecordstoUpdateRefId(ebs.getCheqId(),
+							ebs.getBankAcNo());
+					if (brsUpdate != null) {
+						util.updateEbsUniqueRef(ebs, brsUpdate);
+					}
+
+					if (brsConsolStgList != null && !brsConsolStgList.isEmpty()) {
+						for (BrsConsoldtStg brs : brsConsolStgList) {
+							util.updateUniqueRef(brs, brsUpdate);
+						}
+						brsStgService.updateBrsData(brsConsolStgList);
+					}
+				}
+			}
+			ebsService.saveEbsList(unreconciledEbsBookList);
+		}
+		
+		**/
+	}
+
+	@Override
+	public void afterJob(JobExecution jobExecution) {
+		log.info(":::::::::after job Process execution::::::::::");
+		/**
+		List<BrsBankStatementLineStg> brsBnkStmtList = null;
+		
+		if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
+			
+			brsBnkStmtList = bnkService.getUnprocessedRecords("N");
+
+			if (brsBnkStmtList != null && !brsBnkStmtList.isEmpty()) {
+				
+				log.info("UnProcessed Bank statmenets : "+brsBnkStmtList.size());
+
+				Map<String, List<BrsEbsStg>> mpEbsBnk = new HashMap<>();
+				
+				Map<String, List<BrsBankStatementLineStg>> mpBnk = new HashMap<>();
+
+				for (BrsBankStatementLineStg brsbnk : brsBnkStmtList) {
+					String bankAcNum = brsbnk.getBankAcNo();
+					String uniqueRef = brsbnk.getUniqueRef();
+					
+					if (!mpEbsBnk.containsKey(bankAcNum.concat("/").concat(uniqueRef))) {
+						List<BrsEbsStg> unreconciledEbsBankList = ebsService.getUnreconciledBookEntries("Bank",AppConstants.UNRECONCILED, bankAcNum, uniqueRef);
+						mpEbsBnk.put(bankAcNum.concat("/").concat(uniqueRef), unreconciledEbsBankList);
+					}
+					
+					if(mpBnk.containsKey(bankAcNum.concat("/").concat(uniqueRef))) {
+						mpBnk.get(bankAcNum.concat("/").concat(uniqueRef)).add(brsbnk);
+					}else {
+						List<BrsBankStatementLineStg> list=new ArrayList<BrsBankStatementLineStg>();
+						list.add(brsbnk);
+						mpBnk.put(bankAcNum.concat("/").concat(uniqueRef), list);
+					}
+				}
+				
+				log.info("Unique number wise ens bank statements "+mpEbsBnk.size());
+				log.info("Unique number wise bank statements "+mpBnk.size());
+
+				Set<Map.Entry<String, List<BrsBankStatementLineStg>>> ess = mpBnk.entrySet();
+
+				for (Map.Entry<String, List<BrsBankStatementLineStg>> it : ess) {
+					
+					String key = it.getKey();
+					String[] splitArry = key.split("/");
+					String bankAcNum = splitArry[0];
+					String uniqueRef = splitArry[1];
+					
+					List<BrsBankStatementLineStg> brsBnkStmtList2 =  it.getValue();
+					List<BrsEbsStg> ebsBookList = ebsService.getUnreconciledBookEntries("Book",AppConstants.UNRECONCILED, bankAcNum, uniqueRef);
+					
+					List<BrsEbsStg> ebsBankList = mpEbsBnk.get(key);
+					
+					List<BrsEbsStg> ebsListForBankStmt;
+					
+					if(ebsBookList!=null&&!ebsBookList.isEmpty()) {
+						
+						double sumOfCrAmt = 0;
+						double sumOfDrAmt = 0;
+						double sumOfBankAmt = 0;
+
+						for (BrsEbsStg ebsbook : ebsBookList) {
+							sumOfCrAmt = sumOfCrAmt + ebsbook.getCrAmt();
+							sumOfDrAmt = sumOfDrAmt + ebsbook.getDrAmt();
+						}
+
+						for (BrsBankStatementLineStg bank : brsBnkStmtList2) {
+							sumOfBankAmt = sumOfBankAmt + bank.getAmount();
+						}
+						
+						if(ebsBankList!=null&&!ebsBankList.isEmpty()) {
+							log.info("ebsBankList bank statements "+ebsBankList.size());
+							for (BrsEbsStg ebsbank : ebsBankList) {
+								sumOfBankAmt = sumOfBankAmt + ebsbank.getAmount();
+							}
+						}
+
+						if (sumOfCrAmt != 0 && sumOfCrAmt == sumOfBankAmt) {
+							String matchNum = util.getMtchRefId();
+							log.info("MATCH NUMBER in After Batch process : {}", matchNum);
+
+							if (ebsBookList != null && !ebsBookList.isEmpty()) {
+
+								for (BrsEbsStg ebs : ebsBookList) {
+									ebs.setStatus(AppConstants.RECONCILED);
+									ebs.setErrorMsg("");
+									ebs.setLastUpdateDate(new Date());
+									ebs.setMatchRef(matchNum);
+								}
+							}
+							
+							if (ebsBankList != null && !ebsBankList.isEmpty()) {
+
+								for (BrsEbsStg ebs : ebsBankList) {
+									ebs.setStatus(AppConstants.RECONCILED);
+									ebs.setErrorMsg("");
+									ebs.setLastUpdateDate(new Date());
+									ebs.setMatchRef(matchNum);
+								}
+							}
+
+
+							for (BrsBankStatementLineStg bank : brsBnkStmtList2) {
+								bank.setErrorMsg("");
+								bank.setLastUpdateDate(new Date());
+								bank.setMatchRef(matchNum);
+								bank.setProcessFlag("Y");
+							}
+							
+							ebsListForBankStmt=util.getBrsEBSListForBank(brsBnkStmtList, AppConstants.RECONCILED, "", matchNum, "");
+
+						} else if (sumOfDrAmt != 0 && sumOfDrAmt == sumOfBankAmt) {
+							String matchNum = util.getMtchRefId();
+							log.info("MATCH NUMBER in After Batch process : {}", matchNum);
+
+							if (ebsBookList != null && !ebsBookList.isEmpty()) {
+								for (BrsEbsStg ebs : ebsBookList) {
+									ebs.setStatus(AppConstants.RECONCILED);
+									ebs.setErrorMsg("");
+									ebs.setLastUpdateDate(new Date());
+									ebs.setMatchRef(matchNum);
+								}
+							}
+							
+							if (ebsBankList != null && !ebsBankList.isEmpty()) {
+
+								for (BrsEbsStg ebs : ebsBankList) {
+									ebs.setStatus(AppConstants.RECONCILED);
+									ebs.setErrorMsg("");
+									ebs.setLastUpdateDate(new Date());
+									ebs.setMatchRef(matchNum);
+								}
+							}
+
+							for (BrsBankStatementLineStg bank : brsBnkStmtList2) {
+								bank.setErrorMsg("");
+								bank.setLastUpdateDate(new Date());
+								bank.setMatchRef(matchNum);
+								bank.setProcessFlag("Y");
+							}
+							
+							ebsListForBankStmt=util.getBrsEBSListForBank(brsBnkStmtList, AppConstants.RECONCILED, "", matchNum, "");
+
+						} else {
+							String unmatchNum = util.getBnkcRefId();
+							log.info("UNMATCH NUMBER in After Batch process : {}", unmatchNum);
+
+							for (BrsBankStatementLineStg bank : brsBnkStmtList2) {
+								bank.setErrorMsg("");
+								bank.setLastUpdateDate(new Date());
+								bank.setUnmatchRef(unmatchNum);
+								bank.setProcessFlag("Y");
+							}
+							
+							ebsListForBankStmt=util.getBrsEBSListForBank(brsBnkStmtList, AppConstants.UNRECONCILED, "Bank Contra", "", unmatchNum);
+						}
+						
+						
+						if(ebsBookList!=null&&!ebsBookList.isEmpty()) {
+							ebsService.saveEbsList(ebsBookList);
+						}
+						
+						if(ebsBankList!=null&&!ebsBankList.isEmpty()) {
+							ebsService.saveEbsList(ebsBankList);
+						}
+						
+						if(brsBnkStmtList2!=null&&!brsBnkStmtList2.isEmpty()) {
+							bnkService.saveBankList(brsBnkStmtList2);
+						}
+						
+						if(ebsListForBankStmt!=null&&!ebsListForBankStmt.isEmpty()) {
+							ebsService.saveEbsList(ebsListForBankStmt);
+						}
+					}else {
+						
+						String unmatchNum = util.getBnkcRefId();
+						log.info("EBS ELSE - UNMATCH NUMBER in After Batch process : {}", unmatchNum);
+
+						for (BrsBankStatementLineStg bank : brsBnkStmtList2) {
+							bank.setErrorMsg("");
+							bank.setLastUpdateDate(new Date());
+							bank.setUnmatchRef(unmatchNum);
+							bank.setProcessFlag("Y");
+						}
+						
+						ebsListForBankStmt=util.getBrsEBSListForBank(brsBnkStmtList2, AppConstants.UNRECONCILED, "Bank Contra", "", unmatchNum);
+						
+						
+						if(brsBnkStmtList2!=null&&!brsBnkStmtList2.isEmpty()) {
+							bnkService.saveBankList(brsBnkStmtList2);
+						}
+						
+						if(ebsListForBankStmt!=null&&!ebsListForBankStmt.isEmpty()) {
+							ebsService.saveEbsList(ebsListForBankStmt);
+						}
+					}
+
+				}
+			}
+			
+			log.info(":::::::::after job Process execution completed::::::::::");
+			
+		}
+		**/
+	}
+}

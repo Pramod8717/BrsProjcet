@@ -1,0 +1,77 @@
+package com.brs.entities;
+
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@Entity
+@Table(name = "UAT_XXCD_BANK_STMT_HDR_STG")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+public class BrsBankStmtHeaderStg {
+	@Id
+	@Column(name = "ID")
+	private Long id;
+	
+	@Column(name = "BANK_ACCOUNT_NUM")
+	private String bankAcNo;
+
+	@Column(name = "STATEMENT_NUMBER")
+	private String statementNo;
+	
+	@Temporal(value = TemporalType.DATE)
+	@Column(name = "STATEMENT_DATE")
+	private Date stmtDate;
+	
+	@Column(name = "OU_NAME")
+	private String ou_name;
+	
+	@Column(name = "CONTROL_BEGIN_BALANCE")
+	private Double ctrlBeginBalance;
+	
+	@Column(name = "CONTROL_TOTAL_CR")
+	private Double ctrlTotalCr;
+	
+	@Column(name = "CONTROL_TOTAL_DR")
+	private Double ctrlTotalDr;
+	
+	@Column(name = "CONTROL_END_BALANCE")
+	private Double ctrlEndBalance;
+	
+	@Column(name = "HEADER_ID")
+	private Long headerId;
+
+	@Temporal(value = TemporalType.DATE)
+	@Column(name = "CREATION_DATE")
+	private Date creationDate;
+
+	@Temporal(value = TemporalType.DATE)
+	@Column(name = "LAST_UPDATE_DATE")
+	private Date lastUpdateDate;
+
+	@Column(name = "PROCESS_FLAG")
+	private String processFlag;
+
+	@Column(name = "STG_INT_PROCESS_ID")
+	private Long stgIntProcessId;
+
+	@Column(name = "LOADER_PROCESS_ID")
+	private Long loaderProcessId;
+
+	@Column(name = "ERROR_MESSAGE")
+	private String errorMessage;
+}

@@ -1,0 +1,29 @@
+package com.brs.util;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.brs.entities.BrsConsoldtStg;
+import com.brs.service.BrsDataService;
+
+@Component
+public class AppUtility {
+	
+	@Autowired
+	private BrsDataService service;
+	
+	public static String bankAccountNo=null;
+	public static String voucherDate=null;
+	
+	
+	public static List<BrsConsoldtStg> brsWithoutBankDetails;
+	
+//	public static List<BrsConsoldtStg> brsWithoutBankDetails;
+	
+	
+	
+	
+	
+}

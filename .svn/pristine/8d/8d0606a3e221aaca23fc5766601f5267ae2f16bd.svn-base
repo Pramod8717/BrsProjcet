@@ -1,0 +1,56 @@
+package com.brs.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import com.brs.entities.BrsBankStatementLineStg;
+
+@Repository
+public interface BrsBankStmtLineStgRepository extends JpaRepository<BrsBankStatementLineStg, Long> {
+
+	//	@Query(value = "select * from UAT_XXCD_BANK_STMT_LINE_STG_C where unique_reference = ? and BANK_ACCOUNT_NUM = ? and process_flag = ?", nativeQuery = true)
+	//	@Query(value = "select * from UAT_XXCD_BANK_STMT_LINE_STG_1 where unique_reference = ? and BANK_ACCOUNT_NUM = ? and  process_flag = ?", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BANK_STMT_LINE_STG_1 a where unique_reference = ? and BANK_ACCOUNT_NUM = ? and  process_flag = ? and loader_process_id =(select max(loader_process_id) from uat_xxcd_bank_stmt_line_stg_1 where BANK_ACCOUNT_NUM = a.BANK_ACCOUNT_NUM and unique_reference = a.unique_reference)", nativeQuery = true)
+//	@Query(value = "select * from UAT_XXCD_BANK_STMT_LINE_STG a where unique_reference = ? and BANK_ACCOUNT_NUM = ? and  process_flag = ? and loader_process_id =(select max(loader_process_id) from uat_xxcd_bank_stmt_line_stg where BANK_ACCOUNT_NUM = a.BANK_ACCOUNT_NUM and unique_reference = a.unique_reference)", nativeQuery = true)
+	List<BrsBankStatementLineStg> getBrsBankStmtData(String uniqueRefNo, String bankAcNo, String processFlag);
+
+	
+//	@Query(value = "select * from UAT_XXCD_BANK_STMT_LINE_STG_C where process_flag = ?", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BANK_STMT_LINE_STG_1 where process_flag = ?", nativeQuery = true)
+//	@Query(value = "select * from UAT_XXCD_BANK_STMT_LINE_STG where process_flag = ?", nativeQuery = true)
+	List<BrsBankStatementLineStg> getUnprocessedRecords(String processFlag);
+	
+//	@Query(value = "select * from UAT_XXCD_BANK_STMT_LINE_STG_1 a where unique_reference = ? and BANK_ACCOUNT_NUM = ? and  process_flag = 'N' and loader_process_id =(select max(loader_process_id) from uat_xxcd_bank_stmt_line_stg_1 where BANK_ACCOUNT_NUM = a.BANK_ACCOUNT_NUM and unique_reference = a.unique_reference) "
+//			+ "UNION "
+//			+ "select * from UAT_XXCD_BANK_STMT_LINE_STG_1 b where unique_reference = ? and BANK_ACCOUNT_NUM = ? and  process_flag = 'Y' and loader_process_id =(select max(loader_process_id) from uat_xxcd_bank_stmt_line_stg_1 where BANK_ACCOUNT_NUM = b.BANK_ACCOUNT_NUM and unique_reference = b.unique_reference) ", nativeQuery = true)
+////	@Query(value = "select * from UAT_XXCD_BANK_STMT_LINE_STG a where unique_reference = ? and BANK_ACCOUNT_NUM = ? and  process_flag = 'N' and loader_process_id =(select max(loader_process_id) from uat_xxcd_bank_stmt_line_stg where BANK_ACCOUNT_NUM = a.BANK_ACCOUNT_NUM and unique_reference = a.unique_reference) "
+////			+ "UNION "
+////			+ "select * from UAT_XXCD_BANK_STMT_LINE_STG b where unique_reference = ? and BANK_ACCOUNT_NUM = ? and  process_flag = 'Y' and loader_process_id =(select max(loader_process_id) from uat_xxcd_bank_stmt_line_stg where BANK_ACCOUNT_NUM = b.BANK_ACCOUNT_NUM and unique_reference = b.unique_reference) ", nativeQuery = true)
+//	List<BrsBankStatementLineStg> getBrsBankStmtData(String uniqueRefNo, String bankAcNo,String uniqueRefNo1, String bankAcNo1);
+	
+	@Query(value = "select * from UAT_XXCD_BANK_STMT_LINE_STG_1 a where unique_reference = ? and BANK_ACCOUNT_NUM = ? and  process_flag = 'N' and loader_process_id = ? "
+			+ "UNION "
+			+ "select * from UAT_XXCD_BANK_STMT_LINE_STG_1 b where unique_reference = ? and BANK_ACCOUNT_NUM = ? and  process_flag = 'Y' and loader_process_id = ? ", nativeQuery = true)
+//	@Query(value = "select * from UAT_XXCD_BANK_STMT_LINE_STG a where unique_reference = ? and BANK_ACCOUNT_NUM = ? and  process_flag = 'N' and loader_process_id =(select max(loader_process_id) from uat_xxcd_bank_stmt_line_stg where BANK_ACCOUNT_NUM = a.BANK_ACCOUNT_NUM and unique_reference = a.unique_reference) "
+//			+ "UNION "
+//			+ "select * from UAT_XXCD_BANK_STMT_LINE_STG b where unique_reference = ? and BANK_ACCOUNT_NUM = ? and  process_flag = 'Y' and loader_process_id =(select max(loader_process_id) from uat_xxcd_bank_stmt_line_stg where BANK_ACCOUNT_NUM = b.BANK_ACCOUNT_NUM and unique_reference = b.unique_reference) ", nativeQuery = true)
+	List<BrsBankStatementLineStg> getBrsBankStmtData(String uniqueRefNo, String bankAcNo,Long loaderProcessId,String uniqueRefNo1, String bankAcNo1,Long loaderProcessId1);
+	
+	@Query(value = "select max(loader_process_id) as loader_process_id from uat_xxcd_bank_stmt_line_stg_1 where unique_reference = ? and BANK_ACCOUNT_NUM = ? ", nativeQuery = true)
+	Long getLoaderProcessId(String uniqueRefNo, String bankAcNo);
+	
+	
+	@Query(value = "select * from UAT_XXCD_BANK_STMT_LINE_STG_1 a where unique_reference = ? and BANK_ACCOUNT_NUM = ? and  process_flag = 'N' and loader_process_id = ? ", nativeQuery = true)
+//	@Query(value = "select * from UAT_XXCD_BANK_STMT_LINE_STG a where unique_reference = ? and BANK_ACCOUNT_NUM = ? and  process_flag = 'N' and loader_process_id = ? ", nativeQuery = true)
+	List<BrsBankStatementLineStg> getBrsBankStmtData(String uniqueRefNo, String bankAcNo,Long loaderProcessId);
+	
+	
+	@Query(value = "select * from UAT_XXCD_BANK_STMT_LINE_STG_1 b where unique_reference = ? and BANK_ACCOUNT_NUM = ? and  process_flag = 'Y' and loader_process_id = ? ", nativeQuery = true)
+//	@Query(value = "select * from UAT_XXCD_BANK_STMT_LINE_STG b where unique_reference = ? and BANK_ACCOUNT_NUM = ? and  process_flag = 'Y' and loader_process_id = ? ", nativeQuery = true)
+	List<BrsBankStatementLineStg> getBrsUnreconBankStmtData(String uniqueRefNo, String bankAcNo,Long loaderProcessId);
+	
+
+}

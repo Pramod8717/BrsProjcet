@@ -1,0 +1,90 @@
+package com.brs.batch.resetunrecon;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.brs.service.BrsBankStmtHeaderService;
+import com.brs.service.BrsDataService;
+import com.brs.service.BrsDataServiceImpl;
+import com.brs.util.AppUtility;
+
+@Component
+public class ResetUnreconReader implements ItemReader<String> {
+	Logger log = LoggerFactory.getLogger(ResetUnreconReader.class);
+	
+	@Autowired
+	private BrsDataService brsStgService;
+	
+	@Autowired
+	private BrsBankStmtHeaderService bnkHdrService;
+	
+//	List<String> resetBankAccList=new ArrayList<String>();
+	
+	int totalBankAccounts=0;
+	int index=0;
+	
+	@Autowired
+	public ResetUnreconReader() {
+		totalBankAccounts=0;
+		index=0;
+	}
+	
+//	@PostConstruct
+	public void init() {
+//		resetBankAccList=bnkHdrService.getListOfBankAccountNumber();
+//		if(AppUtility.resetBankAccList!=null&&!AppUtility.resetBankAccList.isEmpty()) {
+			totalBankAccounts=AppUtility.resetBankAccList.size();
+			index=0;
+//		}
+		log.info("ResetUnreconReader init bankAccList "+totalBankAccounts+" Index value : "+index);
+	}
+	
+	public void reset() {
+		AppUtility.resetBankAccList.clear();
+		totalBankAccounts=0;
+		index=0;
+	}
+
+	@Override
+	public String read(){
+		
+		
+		if(AppUtility.bankAccountNo!=null&&!"".equals(AppUtility.bankAccountNo)&&!"null".equals(AppUtility.bankAccountNo)&&
+				AppUtility.voucherDate!=null&&!"".equals(AppUtility.voucherDate)&&!"null".equals(AppUtility.voucherDate)) {
+			
+			brsStgService.updateStatusOfUnreconciledRecord("R",AppUtility.bankAccountNo,AppUtility.voucherDate);
+			log.info("ResetUnreconReader Bank Account Num :  "+AppUtility.bankAccountNo+" Voucher Dt : "+AppUtility.voucherDate);
+			reset();
+			return null;
+			
+		}else {
+			
+			if(index==0&&totalBankAccounts==0) {
+				init();
+				if(totalBankAccounts==0) {
+					return null;
+				}
+			}
+		
+			if(index<totalBankAccounts) {
+				String bankAccNum=AppUtility.resetBankAccList.get(index);
+				brsStgService.updateStatusOfUnreconciledRecord("R",bankAccNum,null);
+				log.info("ResetUnreconReader Bank Account Num :  "+bankAccNum+" Index value : "+index);
+				index++;
+				return bankAccNum;
+			}else {
+				reset();
+				return null;
+			}
+		}
+	}
+
+}

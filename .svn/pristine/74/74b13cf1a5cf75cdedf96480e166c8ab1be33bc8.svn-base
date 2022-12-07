@@ -1,0 +1,127 @@
+package com.brs.service;
+
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.brs.entities.BrsConsoldtStg;
+import com.brs.repository.BrsConsoldtStgRepository;
+
+@Service
+public class BrsDataServiceImpl implements BrsDataService {
+	
+	Logger log = LoggerFactory.getLogger(BrsDataServiceImpl.class);
+
+	@Autowired
+	private BrsConsoldtStgRepository repo;
+	
+//	@Value("${bankAccountNo}")
+	public static String bankAccountNo=null;
+	
+//	@Value("${voucherDate}")
+	public static String voucherDate=null;
+
+	@Override
+	public BrsConsoldtStg getBrsConsoldtStgData() {
+//		System.out.println("BANK ACCOUNT NUM : "+bankAccountNo+" VOUCHER DATE : "+voucherDate);
+		log.info("BANK ACCOUNT NUM : "+bankAccountNo+" VOUCHER DATE : "+voucherDate);
+		
+		if((bankAccountNo!=null&&!"".equals(bankAccountNo))&&(voucherDate!=null&&!"".equals(voucherDate))) {
+			System.out.println("1");
+			log.info("1");
+			return repo.getBrsConsoldtStgData(bankAccountNo,voucherDate);
+		}else if((bankAccountNo!=null&&!"".equals(bankAccountNo))&&(voucherDate==null||"".equals(voucherDate))) {
+			System.out.println("2V");
+			log.info("2V");
+			return repo.getBrsConsoldtStgData(bankAccountNo);
+		}else if((voucherDate!=null&&!"".equals(voucherDate))&&(bankAccountNo==null||"".equals(bankAccountNo))) {
+			System.out.println("3B");
+			log.info("3B");
+			return repo.getBrsConsoldtStgData1(voucherDate);
+		}else {
+			System.out.println("4D");
+			log.info("4D");
+			return repo.getBrsConsoldtStgData();
+		}
+		
+//		return repo.getBrsConsoldtStgData();
+	}
+
+	@Override
+	public List<BrsConsoldtStg> getOtherRecords(String paymentMode, String uniqueRefNo,String backAccountNo) {
+		List<BrsConsoldtStg> otherRecordsList = null;
+//		if ("Cheque".equalsIgnoreCase(paymentMode)) {
+//			otherRecordsList = repo.getBrsChequeRecords(uniqueRefNo);
+//		} else if ("DD".equalsIgnoreCase(paymentMode)) {
+//			otherRecordsList = repo.getBrsDDRecords(uniqueRefNo);
+//		} else if ("Fund Transfer".equalsIgnoreCase(paymentMode)) {
+//			otherRecordsList = repo.getBrsFundTransferRecords(uniqueRefNo);
+//		} else if ("CASH".equalsIgnoreCase(paymentMode)) {
+//			otherRecordsList = repo.getBrsCashRecords(uniqueRefNo);
+//		}else {
+			otherRecordsList = repo.getBrsChequeRecords(uniqueRefNo,backAccountNo);
+//		}
+		return otherRecordsList;
+	}
+
+	@Override
+	public List<BrsConsoldtStg> getBrsRecordsByChequeId(long chequeId) {
+		return repo.getBrsRecordsByChequeId(chequeId);
+	}
+
+	@Override
+	public List<BrsConsoldtStg> getBrsRecordstoUpdateRefId(long chequeId, String bankAcNum) {
+		return repo.getBrsRecordstoUpdateRefId(chequeId, bankAcNum);
+	}
+
+	@Override
+	public List<BrsConsoldtStg> updateBrsData(List<BrsConsoldtStg> brsList) {
+		return repo.saveAllAndFlush(brsList);
+	}
+
+	@Override
+	public List<BrsConsoldtStg> getDayWiseBrsConsoldtStgRecords(String bankAccountNo, String date) {
+		return repo.getDayWiseBrsConsoldtStgRecords(bankAccountNo, date);
+	}
+
+	@Override
+	public List<BrsConsoldtStg> getBrsRecords(String uniqueRefNo, String bankAccountNo, String uniqueRefNo1,
+			String bankAccountNo1) {
+		return repo.getBrsRecords(uniqueRefNo, bankAccountNo, uniqueRefNo1, bankAccountNo1);
+	}
+
+	@Override
+	public List<BrsConsoldtStg> getBrsRecords(String uniqueRefNo, String bankAccountNo) {
+		return repo.getBrsRecords(uniqueRefNo, bankAccountNo);
+	}
+
+	@Override
+	public List<BrsConsoldtStg> getBrsUnreconRecords(String uniqueRefNo, String bankAccountNo) {
+		return repo.getBrsUnreconRecords(uniqueRefNo, bankAccountNo);
+	}
+
+	@Override
+	public BrsConsoldtStg getBrsConsoldtStgData(String bankAccountNo, String voucherDate) {
+		return repo.getBrsConsoldtStgData(bankAccountNo, voucherDate);
+	}
+
+	@Override
+	public BrsConsoldtStg getBrsConsoldtStgData(String bankAccountNo) {
+		return repo.getBrsConsoldtStgData(bankAccountNo);
+	}
+
+	@Override
+	public BrsConsoldtStg getBrsConsoldtStgData1(String voucherDate) {
+		return repo.getBrsConsoldtStgData1(voucherDate);
+	}
+
+	@Override
+	public List<String> getBankAccountNumberList() {
+		return repo.getBankAccountNumberList();
+	}
+
+}

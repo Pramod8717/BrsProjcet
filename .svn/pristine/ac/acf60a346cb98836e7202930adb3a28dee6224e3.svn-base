@@ -1,0 +1,43 @@
+package com.brs.service;
+
+import java.util.List;
+
+
+import com.brs.entities.BrsConsoldtStg;
+
+public interface BrsDataService {
+
+	BrsConsoldtStg getBrsConsoldtStgData();
+
+	List<BrsConsoldtStg> getOtherRecords(String paymentmode, String uniqueRefNo,String backAccountNo);
+
+	List<BrsConsoldtStg> getBrsRecordsByChequeId(long chequeId);
+
+	List<BrsConsoldtStg> getBrsRecordstoUpdateRefId(long chequeId, String bankAcNum);
+
+	List<BrsConsoldtStg> updateBrsData(List<BrsConsoldtStg> brsList);
+	
+	List<BrsConsoldtStg> getDayWiseBrsConsoldtStgRecords(String bankAccountNo,String date);
+	
+	List<BrsConsoldtStg> getBrsRecords(String uniqueRefNo,String bankAccountNo,String uniqueRefNo1,String bankAccountNo1);
+	
+	List<BrsConsoldtStg> getBrsRecords(String uniqueRefNo,String bankAccountNo);
+	
+	List<BrsConsoldtStg> getBrsUnreconRecords(String uniqueRefNo,String bankAccountNo);
+	
+	List<BrsConsoldtStg> getBrsUnreconRecords(String uniqueRefNo,String bankAccountNo,String uniqueRefNo1,String bankAccountNo1);
+	
+	BrsConsoldtStg getBrsConsoldtStgData(String bankAccountNo,String voucherDate);
+	
+	BrsConsoldtStg getBrsConsoldtStgData(String bankAccountNo);
+	
+	BrsConsoldtStg getBrsConsoldtStgData1(String voucherDate);
+	
+	List<String> getBankAccountNumberList();
+	
+	BrsConsoldtStg getBrsUnreconRecords();
+	
+	void updateStatusOfUnreconciledRecord(String status);
+	
+	void updateBrsRecord(String errorMsg,String bankAccNum,String date);
+}

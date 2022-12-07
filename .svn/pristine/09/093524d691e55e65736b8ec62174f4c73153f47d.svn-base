@@ -1,0 +1,23 @@
+package com.brs.util;
+
+public class AppConstants {
+
+	public static String UNRECONCILED = "Unreconciled";
+	public static String RECONCILED = "Reconciled";
+
+	public static String MATCHED = "MTCH";
+	public static String BOOKCONTRA = "BKC";
+	public static String BANKCONTRA = "BNKC";
+
+	public static String UNMATCHED = "UNMTCH";
+
+	public static String PAYMENTMODEERR = "Payment mode is missing in the staging table.";
+	public static String CHEQUEIDERR = "Unique Reference number and cheque id is missing in the staging table.";
+
+	public static String UNQREFNOTFOUNDERR = "Unique Reference number not found in update table using cheque id.";
+	public static String UNQREFNOTADDEDERR = "Unique Reference number is not added in the update table.";
+
+	public static String BANKACNOERR = "Bank account number is missing in the staging table.";
+	public static String BANKSTMTNOTFOUND = "Bank statement records are not found with unique reference.";
+
+}

@@ -1,0 +1,10 @@
+package com.brs.service;
+
+
+import com.brs.entities.BrsBankStmtHeaderStg;
+
+public interface BrsBankStmtHeaderService {
+	
+	BrsBankStmtHeaderStg getBankHeaderList(String bankAccountNum,String stmtDate);
+
+}

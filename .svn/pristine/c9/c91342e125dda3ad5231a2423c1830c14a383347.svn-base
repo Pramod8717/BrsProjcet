@@ -1,0 +1,34 @@
+spring.batch.job.enabled=false
+#spring.batch.jdbc.initialize-schema=always
+server.servlet.context-path=/brs
+server.port=9090
+
+
+spring.sql.init.mode=always
+
+# Oracle settings
+spring.datasource.url=jdbc:oracle:thin:@10.9.48.13:1555:rptdb
+spring.datasource.username=rptusr
+spring.datasource.password=Rptusr#1608
+spring.datasource.driverClassName=oracle.jdbc.driver.OracleDriver
+
+spring.jpa.database=default
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.Oracle10gDialect
+spring.jpa.show-sql=false
+spring.jpa.hibernate.ddl-auto=update
+
+logging.level.s7.Application=WARN
+logging.level.org.springframework.web=ERROR
+logging.level.com.brs=DEBUG
+
+# Logging pattern for the console
+logging.pattern.console= "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+#logging pattern for file
+logging.pattern.file= "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+#logging.file.name=D:/Pranay/logs/brs.log
+
+#for manual execution of BRS app based on either bank account no or voucher date or both
+bankAccountNo=123456789
+voucherDate=01-01-23

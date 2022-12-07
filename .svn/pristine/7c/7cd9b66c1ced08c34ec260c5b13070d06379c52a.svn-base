@@ -1,0 +1,106 @@
+
+package com.brs.entities;
+
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@Entity
+//@Table(name = "UAT_XXCD_BANK_STMT_LINE_STG_C")
+@Table(name = "UAT_XXCD_BANK_STMT_LINE_STG")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+public class BrsBankStatementLineStg {
+
+	@Id
+	@Column(name = "ID")
+	private Long id;
+
+	@Column(name = "BANK_ACCOUNT_NUM")
+	private String bankAcNo;
+
+	@Column(name = "STATEMENT_NUMBER")
+	private String statementNo;
+
+	@Column(name = "LINE_NUMBER")
+	private Long lineNo;
+
+	@Column(name = "TXN_TYPE")
+	private String txnType;
+
+	@Temporal(value = TemporalType.DATE)
+	@Column(name = "TXN_DATE")
+	private Date txnDate;
+
+	@Column(name = "BANK_TRX_NUMBER")
+	private String bankTrxNum;
+
+	@Column(name = "AMOUNT")
+	private Double amount;
+
+	@Temporal(value = TemporalType.DATE)
+	@Column(name = "EFFECTIVE_DATE")
+	private Date effectiveDate;
+
+	@Column(name = "TXN_TEXT")
+	private String txnText;
+
+	@Column(name = "CUSTOMER_TEXT")
+	private String customerText;
+
+	@Column(name = "BANK_ACCOUNT_TEXT")
+	private String bankAccountText;
+
+	@Column(name = "LINE_ID")
+	private Long lineId;
+
+	@Temporal(value = TemporalType.DATE)
+	@Column(name = "CREATION_DATE")
+	private Date creationDate;
+
+	@Temporal(value = TemporalType.DATE)
+	@Column(name = "LAST_UPDATE_DATE")
+	private Date lastUpdateDate;
+
+	@Column(name = "PROCESS_FLAG")
+	private String processFlag;
+
+	@Column(name = "STG_INT_PROCESS_ID")
+	private Long stgIntProcessId;
+
+	@Column(name = "LOADER_PROCESS_ID")
+	private Long loaderProcessId;
+
+	@Column(name = "ERROR_MESSAGE")
+	private String errorMessage;
+
+	@Column(name = "UNIQUE_REFERENCE")
+	private String uniqueRef;
+
+	@Column(name = "MATCH_REFERENCE")
+	private String matchRef;
+
+	@Column(name = "UNMATCH_REFERENCE")
+	private String unmatchRef;
+
+	@Column(name = "PROCESS_STATUS")
+	private String processStatus;
+
+	@Column(name = "ERROR_MESG")
+	private String errorMsg;
+
+}

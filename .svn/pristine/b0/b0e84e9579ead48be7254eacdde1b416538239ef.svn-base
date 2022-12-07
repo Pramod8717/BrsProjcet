@@ -1,0 +1,405 @@
+package com.brs.util;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.brs.entities.BrsBankStatementLineStg;
+import com.brs.entities.BrsConsoldtStg;
+import com.brs.entities.BrsConsotUpdateStg;
+import com.brs.entities.BrsEbsStg;
+import com.brs.entities.BrsError;
+import com.brs.entities.BrsValidateStg;
+import com.brs.repository.BrsConsoldtStgRepository;
+
+@Component
+public class BrsDataUtil {
+
+	@Autowired
+	private BrsConsoldtStgRepository repo;
+
+	public String genUniqueReference(BrsConsoldtStg brsData) {
+
+		String uniqueRef = null;
+		String paymentMode = brsData.getPaymentMode();
+
+		if (paymentMode == null || paymentMode.equals("")) {
+			return null;
+		}
+
+		if ("Cheque".equalsIgnoreCase(paymentMode)) {
+			if (brsData.getChequeNum() == null || brsData.getChequeNum().equals("")) {
+				return null;
+			}
+			if (brsData.getPayslipNo() == null || brsData.getPayslipNo().equals("")) {
+				return null;
+			}
+			uniqueRef = brsData.getChequeNum().concat(brsData.getPayslipNo());
+		} else if ("DD".equalsIgnoreCase(paymentMode)) {
+			if (brsData.getChequeNum() == null || brsData.getChequeNum().equals("")) {
+				return null;
+			}
+			if (brsData.getPayslipNo() == null || brsData.getPayslipNo().equals("")) {
+				return null;
+			}
+			uniqueRef = brsData.getChequeNum().concat(brsData.getPayslipNo());
+		} else if ("Fund Transfer".equalsIgnoreCase(paymentMode)) {
+			if (brsData.getUtrNo() == null || brsData.getUtrNo().equals("")) {
+				return null;
+			}
+			uniqueRef = brsData.getUtrNo();
+		} else if ("CASH".equalsIgnoreCase(paymentMode)) {
+			if (brsData.getPayslipNo() == null || brsData.getPayslipNo().equals("")) {
+				return null;
+			}
+			uniqueRef = brsData.getPayslipNo();
+		}
+
+		return uniqueRef;
+	}
+
+	public String updateUniqueRef(BrsConsoldtStg brsData, BrsConsotUpdateStg brsUpdate) {
+		String uniqueRef = null;
+		try {
+			String paymentMode = brsData.getPaymentMode();
+			if ("Cheque".equalsIgnoreCase(paymentMode)) {
+				brsData.setChequeNum(brsUpdate.getChequeNum());
+				brsData.setPayslipNo(brsUpdate.getPayslipNo());
+				uniqueRef = brsData.getChequeNum().concat(brsData.getPayslipNo());
+			} else if ("DD".equalsIgnoreCase(paymentMode)) {
+				brsData.setChequeNum(brsUpdate.getChequeNum());
+				brsData.setPayslipNo(brsUpdate.getPayslipNo());
+				uniqueRef = brsData.getChequeNum().concat(brsData.getPayslipNo());
+			} else if ("Fund Transfer".equalsIgnoreCase(paymentMode)) {
+				brsData.setUtrNo(brsUpdate.getUtrNo());
+				uniqueRef = brsData.getUtrNo();
+			} else if ("CASH".equalsIgnoreCase(paymentMode)) {
+				brsData.setPayslipNo(brsUpdate.getPayslipNo());
+				uniqueRef = brsData.getPayslipNo();
+			}
+			brsData.setUniqueRef(uniqueRef);
+		} catch (NullPointerException e) {
+			return null;
+		}
+		return uniqueRef;
+	}
+
+	public String updateEbsUniqueRef(BrsEbsStg ebsData, BrsConsotUpdateStg brsUpdate) {
+		String uniqueRef = null;
+		try {
+			String paymentMode = ebsData.getPaymentMode();
+			if ("Cheque".equalsIgnoreCase(paymentMode)) {
+				ebsData.setChequeNum(brsUpdate.getChequeNum());
+				ebsData.setPayslipNo(brsUpdate.getPayslipNo());
+				uniqueRef = ebsData.getChequeNum().concat(ebsData.getPayslipNo());
+			} else if ("DD".equalsIgnoreCase(paymentMode)) {
+				ebsData.setChequeNum(brsUpdate.getChequeNum());
+				ebsData.setPayslipNo(brsUpdate.getPayslipNo());
+				uniqueRef = ebsData.getChequeNum().concat(ebsData.getPayslipNo());
+			} else if ("Fund Transfer".equalsIgnoreCase(paymentMode)) {
+				ebsData.setUtrNo(brsUpdate.getUtrNo());
+				uniqueRef = ebsData.getUtrNo();
+			} else if ("CASH".equalsIgnoreCase(paymentMode)) {
+				ebsData.setPayslipNo(brsUpdate.getPayslipNo());
+				uniqueRef = ebsData.getPayslipNo();
+			}
+			ebsData.setUniqueRef(uniqueRef);
+		} catch (NullPointerException e) {
+			return null;
+		}
+		return uniqueRef;
+	}
+
+	public List<BrsEbsStg> getBrsEBSList(List<BrsConsoldtStg> bookStmtList, String status, String errorMsg,
+			String matchRef, String unMatchRef) {
+		List<BrsEbsStg> brsEbsList = new ArrayList<BrsEbsStg>();
+
+		if (bookStmtList == null || bookStmtList.isEmpty()) {
+			return null;
+		}
+
+		for (BrsConsoldtStg book : bookStmtList) {
+//			book.setMatchRef(matchRef);
+//			book.setUnmatchRef(unMatchRef);
+			book.setStatus(status);
+
+			BrsEbsStg obj = new BrsEbsStg();
+			obj.setStmtType("Book");
+			obj.setBankAcNo(book.getBankAcNo());
+			obj.setAgreementNo(book.getAgreementNo());
+			obj.setSystem(book.getSystem());
+			obj.setVoucherId(book.getVoucherId());
+			obj.setVoucherDate(book.getVoucherDate());
+			obj.setValueDate(book.getValueDate());
+			obj.setBranchId(book.getBranchId());
+			obj.setProposalId(book.getProposalId());
+			obj.setGlCode(book.getGlCode());
+			obj.setGlDescription(book.getGlDescription());
+			obj.setDrAmt(book.getDrAmt());
+			obj.setCrAmt(book.getCrAmt());
+			obj.setNarration(book.getNarration());
+			obj.setStageId(book.getStageId());
+			obj.setCheqId(book.getCheqId());
+			obj.setReceipt_No(book.getReceipt_No());
+			obj.setReceiptNo(book.getReceiptNo());
+			obj.setPaymentMode(book.getPaymentMode());
+			obj.setChequeNum(book.getChequeNum());
+			obj.setUtrNo(book.getUtrNo());
+			obj.setChequeStatus(book.getChequeStatus());
+			obj.setPayslipNo(book.getPayslipNo());
+			obj.setRealizationDate(book.getRealizationDate());
+			obj.setProcessFlag(book.getProcessFlag());
+			obj.setSourceSystem(book.getSourceSystem());
+			obj.setUniqueRef(book.getUniqueRef());
+			obj.setCreationDate(new Date());
+			obj.setLastUpdateDate(new Date());
+//			obj.setMatchRef(book.getMatchRef()); // added by pranay
+//			obj.setUnmatchRef(book.getUnmatchRef()); // added by pranay
+			
+			obj.setMatchRef(matchRef);
+			obj.setUnmatchRef(unMatchRef);
+			
+			obj.setStatus(status);
+			obj.setErrorMsg(errorMsg);
+			
+			
+			obj.setJeBatchId(book.getJeBatchId());
+			obj.setPeriodName(book.getPeriodName());
+			obj.setJeHeaderId(book.getJeHeaderId());
+			obj.setJeLineNum(book.getJeLineNum());
+			obj.setChartOfAccountId(book.getChartOfAccountId());
+			obj.setFuntionalCurrencyCode(book.getFuntionalCurrencyCode());
+			obj.setCodeCombinationId(book.getCodeCombinationId());
+			
+			boolean clubFlag=false;
+			if(!brsEbsList.isEmpty()) {
+				for(BrsEbsStg ebs:brsEbsList) {
+					if(book.getBankAcNo().equals(ebs.getBankAcNo())
+							&&book.getUniqueRef().equals(ebs.getUniqueRef())) {
+						ebs.setDrAmt(ebs.getDrAmt()+book.getDrAmt());
+						ebs.setCrAmt(ebs.getCrAmt()+book.getCrAmt());
+						clubFlag=true;
+					}
+				}
+			}
+
+			if(!clubFlag) {
+				brsEbsList.add(obj);
+			}
+//			brsEbsList.add(obj);
+		}
+		return brsEbsList;
+	}
+
+	public List<BrsEbsStg> getBrsEBSListForBank(List<BrsBankStatementLineStg> bankStmtList, String status,
+			String errorMsg, String matchRef, String unmatchRef) {
+		List<BrsEbsStg> brsEbsList = new ArrayList<BrsEbsStg>();
+
+		if (bankStmtList == null || bankStmtList.isEmpty()) {
+			return null;
+		}
+
+		for (BrsBankStatementLineStg bank : bankStmtList) {
+			bank.setMatchRef(matchRef);
+			bank.setUnmatchRef(unmatchRef);
+
+			BrsEbsStg obj = new BrsEbsStg();
+			obj.setStmtType("Bank");
+			obj.setBankAcNo(bank.getBankAcNo());
+			obj.setStatementNo(bank.getStatementNo());
+			obj.setLineNo(bank.getLineNo());
+			obj.setTxnText(bank.getTxnText());
+			obj.setTxnDate(bank.getTxnDate());
+			obj.setBankTrxNum(bank.getBankTrxNum());
+			
+//			obj.setAmount(bank.getAmount());
+			
+			if(bank.getTxnType()!=null&&!bank.getTxnType().equals("")) {
+				if(bank.getTxnType().trim().equalsIgnoreCase("CR")) {
+					obj.setCrAmt(bank.getAmount());
+				}else if(bank.getTxnType().trim().equalsIgnoreCase("DR")){
+					obj.setDrAmt(bank.getAmount());
+				}else {
+					errorMsg=errorMsg+" Transaction type not proper- "+bank.getAmount();
+				}
+			}else {
+				errorMsg=errorMsg+" Transaction type not proper- "+bank.getAmount();
+			}
+			
+			obj.setEffectiveDate(bank.getEffectiveDate());
+			obj.setTxnType(bank.getTxnType());
+			obj.setCustomerText(bank.getCustomerText());
+			obj.setBankAccountText(bank.getBankAccountText());
+			obj.setLineId(bank.getLineId());
+			obj.setProcessFlag(bank.getProcessFlag());
+			obj.setStgIntProcessId(bank.getStgIntProcessId());
+			obj.setLoaderProcessId(bank.getLoaderProcessId());
+			obj.setMatchRef(bank.getMatchRef());
+			obj.setUnmatchRef(bank.getUnmatchRef());
+			obj.setProcessStatus(bank.getProcessStatus());
+			obj.setUniqueRef(bank.getUniqueRef());
+			obj.setCreationDate(new Date());
+			obj.setLastUpdateDate(new Date());
+			obj.setStatus(status);
+			obj.setErrorMsg(errorMsg);
+			
+			
+			boolean clubFlag=false;
+			if(!brsEbsList.isEmpty()) {
+				for(BrsEbsStg ebs:brsEbsList) {
+					if(bank.getBankAcNo().equals(ebs.getBankAcNo())
+							&&bank.getUniqueRef().equals(ebs.getUniqueRef())) {
+						
+//						ebs.setAmount(ebs.getAmount()+bank.getAmount());
+						
+						if(bank.getTxnType()!=null&&!bank.getTxnType().equals("")) {
+							if(bank.getTxnType().trim().equalsIgnoreCase("CR")) {
+								if(ebs.getCrAmt()!=null&&bank.getAmount()!=null) {
+									ebs.setCrAmt(ebs.getCrAmt()+bank.getAmount());
+								}
+							}else if(bank.getTxnType().trim().equalsIgnoreCase("DR")){
+								if(ebs.getDrAmt()!=null&&bank.getAmount()!=null) {
+									ebs.setDrAmt(ebs.getDrAmt()+bank.getAmount());
+								}
+							}
+						}
+						
+						clubFlag=true;
+					}
+				}
+			}
+
+			if(!clubFlag) {
+				brsEbsList.add(obj);
+			}
+
+//			brsEbsList.add(obj);
+		}
+		return brsEbsList;
+	}
+
+	public String getMtchRefId() {
+//		return AppConstants.MATCHED.concat(String.valueOf(new Random().nextInt(90) + 10));
+		return AppConstants.MATCHED.concat(String.valueOf(repo.getMtchRefId()));
+	}
+
+	public String getBkcRefId() {
+//		return AppConstants.BOOKCONTRA.concat(String.valueOf(new Random().nextInt(90) + 10));
+		return AppConstants.BOOKCONTRA.concat(String.valueOf(repo.getBkcRefId()));
+	}
+
+	public String getBnkcRefId() {
+//		return AppConstants.BANKCONTRA.concat(String.valueOf(new Random().nextInt(90) + 10));
+		return AppConstants.BANKCONTRA.concat(String.valueOf(repo.getBnkcRefId()));
+	}
+
+	public String getUnmtchRefId() {
+//		return AppConstants.UNMATCHED.concat(String.valueOf(new Random().nextInt(90) + 10));
+		return AppConstants.UNMATCHED.concat(String.valueOf(repo.getUnmtchRefId()));
+	}
+	
+	
+	
+	public BrsError getErrorDetails(String tblTyp,Long refNum,String bankAccountNo,String uniqueRef,String remark) {
+		BrsError error=new BrsError();
+		error.setTblTyp(tblTyp);
+		error.setRefId(refNum);
+		error.setBankAccountNo(bankAccountNo);
+		error.setUniqueRef(uniqueRef);
+		error.setRemark(remark);
+		error.setCreationDate(new Date());
+		return error;
+	}
+	
+	public List<BrsValidateStg> getBrsValidateStgList(List<BrsConsoldtStg> bookStmtList, String status, String errorMsg,
+			String matchRef, String unMatchRef) {
+		
+		List<BrsValidateStg> brsValidateList = new ArrayList<BrsValidateStg>();
+
+		if (bookStmtList == null || bookStmtList.isEmpty()) {
+			return null;
+		}
+
+		for (BrsConsoldtStg book : bookStmtList) {
+			
+//			book.setMatchRef(matchRef);
+//			book.setUnmatchRef(unMatchRef);
+			
+			book.setStatus(status);
+
+			BrsValidateStg obj = new BrsValidateStg();
+			
+			obj.setBankAcNo(book.getBankAcNo());
+			obj.setAgreementNo(book.getAgreementNo());
+			obj.setSystem(book.getSystem());
+			obj.setVoucherId(book.getVoucherId());
+			obj.setVoucherDate(book.getVoucherDate());
+			obj.setValueDate(book.getValueDate());
+			obj.setBranchId(book.getBranchId());
+			obj.setProposalId(book.getProposalId());
+			obj.setGlCode(book.getGlCode());
+			obj.setGlDescription(book.getGlDescription());
+			obj.setDrAmt(book.getDrAmt());
+			obj.setCrAmt(book.getCrAmt());
+			obj.setNarration(book.getNarration());
+			obj.setStageId(book.getStageId());
+			obj.setCheqId(book.getCheqId());
+			obj.setReceipt_No(book.getReceipt_No());
+			obj.setReceiptNo(book.getReceiptNo());
+			obj.setPaymentMode(book.getPaymentMode());
+			obj.setChequeNum(book.getChequeNum());
+			obj.setUtrNo(book.getUtrNo());
+			obj.setChequeStatus(book.getChequeStatus());
+			obj.setPayslipNo(book.getPayslipNo());
+			obj.setRealizationDate(book.getRealizationDate());
+			obj.setProcessFlag(book.getProcessFlag());
+			obj.setSourceSystem(book.getSourceSystem());
+			obj.setUniqueRef(book.getUniqueRef());
+			obj.setCreationDate(book.getCreationDate());
+			obj.setLastUpdateDate(new Date());
+			
+//			obj.setMatchRef(book.getMatchRef()); // added by pranay
+//			obj.setUnmatchRef(book.getUnmatchRef()); // added by pranay
+			
+			obj.setMatchRef(matchRef); 
+			obj.setUnmatchRef(unMatchRef); 
+			
+			obj.setProcessStatus(status);
+			obj.setErrorMsg(errorMsg);
+						
+			obj.setJeBatchId(book.getJeBatchId());
+			obj.setPeriodName(book.getPeriodName());
+			obj.setJeHeaderId(book.getJeHeaderId());
+			obj.setJeLineNum(book.getJeLineNum());
+			obj.setChartOfAccountId(book.getChartOfAccountId());
+			obj.setFuntionalCurrencyCode(book.getFuntionalCurrencyCode());
+			obj.setCodeCombinationId(book.getCodeCombinationId());
+			
+			obj.setCreatedBy(book.getCreatedBy());
+			obj.setLastUpdatedBy(book.getLastUpdateBy());
+			
+			boolean clubFlag=false;
+			if(!brsValidateList.isEmpty()) {
+				for(BrsValidateStg ebs:brsValidateList) {
+					if(book.getBankAcNo().equals(ebs.getBankAcNo())
+							&&book.getUniqueRef().equals(ebs.getUniqueRef())) {
+						ebs.setDrAmt(ebs.getDrAmt()+book.getDrAmt());
+						ebs.setCrAmt(ebs.getCrAmt()+book.getCrAmt());
+						clubFlag=true;
+					}
+				}
+			}
+
+			if(!clubFlag) {
+				brsValidateList.add(obj);
+			}
+		}
+		return brsValidateList;
+	}
+	
+	
+	
+}

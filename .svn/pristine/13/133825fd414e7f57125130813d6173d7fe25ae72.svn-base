@@ -1,0 +1,161 @@
+package com.brs.config;
+
+import java.util.List;
+
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import com.brs.batch.BrsDataItemProcessor;
+import com.brs.batch.BrsDataItemReader;
+import com.brs.batch.BrsDataItemWriter;
+import com.brs.batch.JobExecListener;
+import com.brs.batch.bnkstmthdr.BankStmtHdrProcessor;
+import com.brs.batch.bnkstmthdr.BankStmtHdrReader;
+import com.brs.batch.nullrecordreader.BrsNullBankReader;
+import com.brs.batch.resetunrecon.NoOpItemWriter;
+import com.brs.batch.resetunrecon.ResetUnreconReader;
+import com.brs.batch.unreconreader.BrsDataUnreconItemReader;
+import com.brs.batch.updateunqref.UpdateUnqRefProcessor;
+import com.brs.batch.updateunqref.UpdateUnqRefReader;
+import com.brs.entities.BrsBankStmtHeaderStg;
+import com.brs.entities.BrsConsoldtStg;
+
+@Configuration
+@EnableBatchProcessing
+public class BatchConfiguration {
+
+	@Autowired
+	private JobBuilderFactory jobBuilderFactory;
+
+	@Autowired
+	private StepBuilderFactory stepBuilderFactory;
+
+	@Bean
+	public BrsDataItemReader reader() {
+		return new BrsDataItemReader();
+	}
+			
+	@Bean
+	public BrsDataItemProcessor processor() {
+		return new BrsDataItemProcessor();
+	}
+
+	@Bean
+	public BrsDataItemWriter writer() {
+		return new BrsDataItemWriter();
+	}
+	
+	@Bean
+	public JobExecListener listener() {
+		return new JobExecListener();
+	}
+	
+	@Bean
+	public ResetUnreconReader resetUnreconReader() {
+		return new ResetUnreconReader();
+	}
+	
+	@Bean
+	public NoOpItemWriter noOpWriter() {
+		return new NoOpItemWriter();
+	}
+	
+	@Bean
+	public BrsDataUnreconItemReader unreconReader() {
+		return new BrsDataUnreconItemReader();
+	}
+	
+	@Bean
+	public BankStmtHdrReader bnkStmtHdrReader() {
+		return new BankStmtHdrReader();
+	}
+	
+	@Bean
+	public BankStmtHdrProcessor bnkStmtHdrProcessor() {
+		return new BankStmtHdrProcessor();
+	}
+	
+	@Bean
+	public UpdateUnqRefReader updateUnqRefReader() {
+		return new UpdateUnqRefReader();
+	}
+	
+	@Bean
+	public UpdateUnqRefProcessor updateUnqRefProcessor() {
+		return new UpdateUnqRefProcessor();
+	}
+	
+	@Bean
+	public BrsNullBankReader brsNullBankReader() {
+		return new BrsNullBankReader();
+	}
+	
+	
+	@Bean
+	public Job createJob() {
+		System.out.println("INSIDE JOB EXECUTION...!!!");
+		
+//		return jobBuilderFactory.get("MyJob").incrementer(new RunIdIncrementer()).listener(listener())
+//				.flow(createStep())
+//				.next(unprocessedEnteries()).end().build();
+		
+		return jobBuilderFactory.get("MyJob").incrementer(new RunIdIncrementer()).listener(listener())
+				.flow(resetStatusOfUnProcessedRecords())
+				.next(checkAndUpdateBrsDataDateAndStmtwise())
+				.next(updateBrsRecordsWithNoUnqRef())
+				.next(updateNullValueRecord())
+				.next(processNewRecords())
+				.next(processUnreconciledRecords()).end().build();
+	}
+
+	@Bean
+	public Step resetStatusOfUnProcessedRecords() {
+		System.out.println("STEP - 1 !!!");
+		return stepBuilderFactory.get("MyStep3").<String, List<Object>>chunk(25).reader(resetUnreconReader()).writer(noOpWriter()).build();
+	}
+	
+	@Bean
+	public Step checkAndUpdateBrsDataDateAndStmtwise() {
+		System.out.println("STEP - 2 !!!");
+		return stepBuilderFactory.get("MyStep4").<BrsBankStmtHeaderStg, List<Object>>chunk(25).reader(bnkStmtHdrReader()).processor(bnkStmtHdrProcessor()).writer(noOpWriter()).build();
+	}
+	
+	
+	@Bean
+	public Step updateBrsRecordsWithNoUnqRef() {
+		System.out.println("STEP - 3 !!!");
+		return stepBuilderFactory.get("MyStep5").<BrsConsoldtStg, List<BrsConsoldtStg>>chunk(25).reader(updateUnqRefReader())
+				.processor(updateUnqRefProcessor()).writer(writer()).build();
+	}
+	
+	@Bean
+	public Step updateNullValueRecord() {
+		System.out.println("STEP - 4 !!!");
+		return stepBuilderFactory.get("MyStep6").<BrsConsoldtStg, List<BrsConsoldtStg>>chunk(25).reader(brsNullBankReader())
+				.processor(processor()).writer(writer()).build();
+	}
+
+
+	@Bean
+	public Step processNewRecords() {
+		System.out.println("STEP - 5 !!!");
+		return stepBuilderFactory.get("MyStep").<BrsConsoldtStg, List<BrsConsoldtStg>>chunk(25).reader(reader())
+				.processor(processor()).writer(writer()).build();
+	}
+	
+	@Bean
+	public Step processUnreconciledRecords() {
+		System.out.println("STEP - 6 !!!");
+		return stepBuilderFactory.get("MyStep1").<BrsConsoldtStg, List<BrsConsoldtStg>>chunk(25).reader(unreconReader())
+				.processor(processor()).writer(writer()).build();
+	}
+	
+	
+}

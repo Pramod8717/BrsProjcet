@@ -1,0 +1,102 @@
+package com.brs.batch.bnkstmthdr;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.NonTransientResourceException;
+import org.springframework.batch.item.ParseException;
+import org.springframework.batch.item.UnexpectedInputException;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.brs.entities.BrsBankStmtHeaderStg;
+import com.brs.service.BrsBankStmtHeaderService;
+import com.brs.service.BrsDataService;
+import com.brs.service.BrsDataServiceImpl;
+import com.brs.util.AppConstants;
+import com.brs.util.AppUtility;
+
+public class BankStmtHdrReader implements ItemReader<BrsBankStmtHeaderStg>{
+	Logger log = LoggerFactory.getLogger(BankStmtHdrReader.class);
+	@Autowired
+	private BrsDataService brsStgService;
+	
+	@Autowired
+	private BrsBankStmtHeaderService bnkHdrService;
+	
+	List<String> bankAccountList=new ArrayList<String>();
+	
+	int totalBankAccounts=0;
+	int index=0;
+	
+	int counter=0;
+	
+//	@PostConstruct
+	public void init() {
+		bankAccountList=brsStgService.getBankAccountNumberList();
+		if(bankAccountList!=null&&!bankAccountList.isEmpty()) {
+			totalBankAccounts=bankAccountList.size();
+			index=0;
+		}
+		log.info("BankStmtHdrReader init bankAccList "+totalBankAccounts+" Index value : "+index);
+	}
+	
+	public void reset() {
+		bankAccountList.clear();
+		totalBankAccounts=0;
+		index=0;
+		counter=0;
+	}
+
+	@Override
+	public BrsBankStmtHeaderStg read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+		
+		if(AppUtility.bankAccountNo!=null&&!"".equals(AppUtility.bankAccountNo)&&!"null".equals(AppUtility.bankAccountNo)&&
+				AppUtility.voucherDate!=null&&!"".equals(AppUtility.voucherDate)&&!"null".equals(AppUtility.voucherDate)) {
+			log.info("BankStmtHdrReader Bank Account Num :  "+AppUtility.bankAccountNo+" Voucher Dt : "+AppUtility.voucherDate+" ctr : "+counter);
+			if(counter>0) {
+				counter=0;
+				reset();
+				return null;
+			}
+			
+			BrsBankStmtHeaderStg bankHeader=bnkHdrService.getBankHeaderList(AppUtility.bankAccountNo, AppUtility.voucherDate);
+			counter++;
+			if(bankHeader==null) {
+				log.info("Bank Header not found!!");
+				brsStgService.updateBrsRecord(AppConstants.ERR_MSG_BANK_HDR_NF, AppUtility.bankAccountNo, AppUtility.voucherDate);
+			}
+			return bankHeader;
+			
+			
+		}else {
+			if(index==0&&totalBankAccounts==0) {
+				init();
+			}
+		
+			if(index<totalBankAccounts) {
+				String bankAccNum=bankAccountList.get(index);
+				
+				BrsBankStmtHeaderStg bankHeader=bnkHdrService.getBankHeaderList(bankAccNum, null);
+				log.info("BankStmtHdrReader Bank Account Num :  "+bankAccNum+" Index value : "+index);
+				index++;
+				
+				if(bankHeader==null) {
+					log.info("Bank Header not found!!");
+					brsStgService.updateBrsRecord(AppConstants.ERR_MSG_BANK_HDR_NF, bankAccNum, null);
+					bankHeader=new BrsBankStmtHeaderStg();
+				}
+				return bankHeader;
+			}else {
+				reset();
+				return null;
+			}
+		
+		}
+	}
+
+}

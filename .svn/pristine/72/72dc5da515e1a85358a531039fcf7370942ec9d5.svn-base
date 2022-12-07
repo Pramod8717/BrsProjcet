@@ -1,0 +1,21 @@
+package com.brs.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import com.brs.entities.BrsBankStatementLineStg;
+
+@Repository
+public interface BrsBankStmtLineStgRepository extends JpaRepository<BrsBankStatementLineStg, Long> {
+
+//	@Query(value = "select * from UAT_XXCD_BANK_STMT_LINE_STG where unique_reference = ? and BANK_ACCOUNT_NUM = ? and process_flag = ?", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BANK_STMT_LINE_STG_C where unique_reference = ? and BANK_ACCOUNT_NUM = ? and process_flag = ?", nativeQuery = true)
+	List<BrsBankStatementLineStg> getBrsBankStmtData(String uniqueRefNo, String bankAcNo, String processFlag);
+
+//	@Query(value = "select * from UAT_XXCD_BANK_STMT_LINE_STG where process_flag = ?", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BANK_STMT_LINE_STG_C where process_flag = ?", nativeQuery = true)
+	List<BrsBankStatementLineStg> getUnprocessedRecords(String processFlag);
+}

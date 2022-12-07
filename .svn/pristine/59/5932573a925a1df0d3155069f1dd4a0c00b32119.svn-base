@@ -1,0 +1,66 @@
+package com.brs.config;
+
+import java.util.List;
+
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import com.brs.batch.BrsDataItemProcessor;
+import com.brs.batch.BrsDataItemReader;
+import com.brs.batch.BrsDataItemWriter;
+import com.brs.batch.JobExecListener;
+import com.brs.entities.BrsConsoldtStg;
+
+@Configuration
+@EnableBatchProcessing
+public class BatchConfiguration {
+
+	@Autowired
+	private JobBuilderFactory jobBuilderFactory;
+
+	@Autowired
+	private StepBuilderFactory stepBuilderFactory;
+
+	@Bean
+	public BrsDataItemReader reader() {
+		return new BrsDataItemReader();
+	}
+		
+	@Bean
+	public BrsDataItemProcessor processor() {
+		return new BrsDataItemProcessor();
+	}
+
+	@Bean
+	public BrsDataItemWriter writer() {
+		return new BrsDataItemWriter();
+	}
+	
+	@Bean
+	public JobExecListener listener() {
+		return new JobExecListener();
+	}
+	
+	@Bean
+	public Job createJob() {
+		return jobBuilderFactory.get("MyJob").incrementer(new RunIdIncrementer()).listener(listener())
+				.flow(createStep()).end().build();
+	}
+
+	@Bean
+	public Step createStep() {
+		return stepBuilderFactory.get("MyStep").<BrsConsoldtStg, List<BrsConsoldtStg>>chunk(1).reader(reader())
+				.processor(processor()).writer(writer()).build();
+	}
+
+	
+}

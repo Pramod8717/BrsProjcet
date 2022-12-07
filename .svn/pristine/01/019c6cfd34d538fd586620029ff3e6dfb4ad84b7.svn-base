@@ -1,0 +1,66 @@
+
+package com.brs.entities;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@Entity
+//@Table(name = "UAT_XXCD_BRS_CONS_UPDATE_STG_C")
+@Table(name = "UAT_XXCD_BRS_CONS_UPDATE_STG_1")
+//@Table(name = "UAT_XXCD_BRS_CONS_UPDATE_STG")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+public class BrsConsotUpdateStg {
+
+	@Id
+	@Column(name = "ID")
+	private Long id;
+
+	@Column(name = "CHEQ_ID")
+	private Long cheqId;
+
+	@Column(name = "CHEQUENUM")
+	private String chequeNum;
+
+	@Column(name = "UTR_NO")
+	private String utrNo;
+
+	@Column(name = "PAYSLIPNO")
+	private String payslipNo;
+
+	@Column(name = "PROCESS_FLAG")
+	private String processFlag;
+	
+	@Column(name = "JE_BATCH_ID")
+	private Long jeBatchId;
+
+	@Column(name = "PERIOD_NAME")
+	private String periodName;
+	
+	@Column(name = "JE_HEADER_ID")
+	private Long jeHeaderId;
+	
+	@Column(name = "JE_LINE_NUM")
+	private Long jeLineNum;
+	
+	@Column(name = "CHART_OF_ACCOUNTS_ID")
+	private Long chartOfAccountId;
+	
+	@Column(name = "FUNCTIONAL_CURRENCY_CODE")
+	private String funtionalCurrencyCode;
+	
+	@Column(name = "CODE_COMBINATION_ID")
+	private Long codeCombinationId;
+
+}

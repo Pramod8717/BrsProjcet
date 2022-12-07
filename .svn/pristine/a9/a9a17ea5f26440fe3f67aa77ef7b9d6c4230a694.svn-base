@@ -1,0 +1,89 @@
+package com.brs.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import com.brs.entities.BrsConsoldtStg;
+
+@Repository
+public interface BrsConsoldtStgRepository extends JpaRepository<BrsConsoldtStg, Long> {
+
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where process_flag='N' and BANK_ACCOUNT_NO is not null and ROWNUM <= 1 order by id,bank_account_no,system", nativeQuery = true)
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where process_flag='N' and ROWNUM <= 1", nativeQuery = true)
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where process_flag='N' and VOUCHERDATE = to_date(to_char(sysdate-1)) and ROWNUM <= 1", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='N' and VOUCHERDATE = to_date(to_char(sysdate-48)) and ROWNUM <= 1", nativeQuery = true)
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='N' and VOUCHERDATE = TO_DATE('04-07-22','DD-MM-YY') and ROWNUM <= 1", nativeQuery = true)
+	BrsConsoldtStg getBrsConsoldtStgData();
+	
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='N' and BANK_ACCOUNT_NO = ? AND VOUCHERDATE = TO_DATE(?, 'DD-MM-YY') and ROWNUM <= 1", nativeQuery = true)
+	BrsConsoldtStg getBrsConsoldtStgData(String bankAccountNo,String voucherDate);
+	
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='N' and BANK_ACCOUNT_NO = ?  and ROWNUM <= 1", nativeQuery = true)
+	BrsConsoldtStg getBrsConsoldtStgData(String bankAccountNo);
+	
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='N' AND VOUCHERDATE = TO_DATE(?, 'DD-MM-YY') and ROWNUM <= 1", nativeQuery = true)
+	BrsConsoldtStg getBrsConsoldtStgData1(String voucherDate);
+
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where process_flag='N' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ? ", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='N' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ? ", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsChequeRecords(String uniqueRefNo,String bankAccountNo);
+
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where UNIQUE_REFERENCE = ? ", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where UNIQUE_REFERENCE = ? ", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsDDRecords(String uniqueRefNo);
+
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where utr_no = ?", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where utr_no = ?", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsFundTransferRecords(String uniqueRefNo);
+
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where UNIQUE_REFERENCE = ? ", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where UNIQUE_REFERENCE = ? ", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsCashRecords(String uniqueRefNo);
+
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where CHEQ_ID = ?", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where CHEQ_ID = ?", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsRecordsByChequeId(long chequeId);
+
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where cheq_id = ? and bank_account_no = ?", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where cheq_id = ? and bank_account_no = ?", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsRecordstoUpdateRefId(long chequeId, String bankAcNum);
+
+	@Query(value = "select SEQ_MTCH_REF.nextval from dual", nativeQuery = true)
+	Long getMtchRefId();
+
+	@Query(value = "select SEQ_BKC_REF.nextval from dual", nativeQuery = true)
+	Long getBkcRefId();
+
+	@Query(value = "select SEQ_BNKC_REF.nextval from dual", nativeQuery = true)
+	Long getBnkcRefId();
+	
+	@Query(value = "select SEQ_UNMTCH_REF.nextval from dual", nativeQuery = true)
+	Long getUnmtchRefId();
+	
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where  process_flag='N' and BANK_ACCOUNT_NO = ? AND VOUCHERDATE = TO_DATE(?, 'DD-MM-YY') ", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='N' and BANK_ACCOUNT_NO = ? AND VOUCHERDATE = TO_DATE(?, 'DD-MM-YY') ", nativeQuery = true)
+	List<BrsConsoldtStg> getDayWiseBrsConsoldtStgRecords(String bankAccountNo,String date);
+	
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where process_flag='N' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ? "
+//			+ "Union "
+//			+ "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where status='Unreconciled' and process_flag='Y' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ?", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='N' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ? "
+			+ "Union "
+			+ "select * from UAT_XXCD_BRS_CONSOLDT_STG where status='Unreconciled' and process_flag='Y' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ?", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsRecords(String uniqueRefNo,String bankAccountNo,String uniqueRefNo1,String bankAccountNo1);
+	
+	
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where process_flag='N' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ? ", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='N' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ? ", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsRecords(String uniqueRefNo,String bankAccountNo);
+	
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where status='Unreconciled' and process_flag='Y' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ?", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where status='Unreconciled' and process_flag='Y' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ?", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsUnreconRecords(String uniqueRefNo,String bankAccountNo);
+	
+	@Query(value = "select Distinct BANK_ACCOUNT_NO  from UAT_XXCD_BRS_CONSOLDT_STG", nativeQuery = true)
+	List<String> getBankAccountNumberList();
+}

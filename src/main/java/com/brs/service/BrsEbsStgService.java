@@ -1,0 +1,17 @@
+package com.brs.service;
+
+import java.util.List;
+
+import com.brs.entities.BrsEbsStg;
+
+public interface BrsEbsStgService {
+	List<BrsEbsStg> getBrsEbsStgData(String uniqueRefNo, String bankAcNo, String stmtType);
+
+	List<BrsEbsStg> saveEbsList(List<BrsEbsStg> brsEbsList);
+
+	List<BrsEbsStg> getUnreconciledBookEntries(String stmtType, String status);
+
+	List<BrsEbsStg> getUnreconciledBookEntries(String stmtType, String status, String bankAcNum, String uniqueRefNo);
+	
+	BrsEbsStg getIdFromEbsEntry(String stmtType,String status,String bankAccountNo,String uniqueRef);
+}

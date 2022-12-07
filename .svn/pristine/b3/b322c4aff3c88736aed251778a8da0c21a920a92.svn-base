@@ -1,0 +1,24 @@
+package com.brs.batch;
+
+import org.springframework.batch.item.ItemReader;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.brs.entities.BrsConsoldtStg;
+import com.brs.service.BrsDataService;
+
+public class BrsDataItemReader implements ItemReader<BrsConsoldtStg> {
+
+	@Autowired
+	private BrsDataService service;
+
+	@Override
+	public BrsConsoldtStg read() {
+		BrsConsoldtStg brsdata = service.getBrsConsoldtStgData();
+		if (brsdata != null) {
+			return brsdata;
+		} else {
+			return null;
+		}
+	}
+
+}

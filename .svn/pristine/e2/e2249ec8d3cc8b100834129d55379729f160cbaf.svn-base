@@ -1,0 +1,29 @@
+package com.brs.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import com.brs.entities.BrsEbsStg;
+
+@Repository
+public interface BrsEbsStgRepository extends JpaRepository<BrsEbsStg, Long> {
+
+//	@Query(value = "select * from UAT_XXCD_BRS_EBS_STG_1 where unique_reference = ? and BANK_ACCOUNT_NO = ? and STMT_TYPE = ? and STATUS ='Unreconciled'", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_EBS_STG where unique_reference = ? and BANK_ACCOUNT_NO = ? and STMT_TYPE = ? and STATUS ='Unreconciled'", nativeQuery = true)
+	List<BrsEbsStg> getBrsEbsStgData(String uniqueRefNo, String bankAcNo, String stmtType);
+
+//	@Query(value = "select * from UAT_XXCD_BRS_EBS_STG_1 where STMT_TYPE = ? and STATUS = ? and BANK_ACCOUNT_NO = ? and unique_reference = ?", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_EBS_STG where STMT_TYPE = ? and STATUS = ? and BANK_ACCOUNT_NO = ? and unique_reference = ?", nativeQuery = true)
+	List<BrsEbsStg> getUnreconciledBookEntries(String stmtType, String status, String bankAcNum, String uniqueRefNo);
+
+//	@Query(value = "select * from UAT_XXCD_BRS_EBS_STG_1 where STMT_TYPE = ? and STATUS = ?", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_EBS_STG where STMT_TYPE = ? and STATUS = ?", nativeQuery = true)
+	List<BrsEbsStg> getUnreconciledBookEntries(String stmtType, String status);
+	
+//	@Query(value = "select * from UAT_XXCD_BRS_EBS_STG_1 where STMT_TYPE = ? and STATUS = ? and BANK_ACCOUNT_NO = ? and unique_reference = ?", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_EBS_STG where STMT_TYPE = ? and STATUS = ? and BANK_ACCOUNT_NO = ? and unique_reference = ? and ROWNUM <= 1", nativeQuery = true)
+	BrsEbsStg getIdFromEbsEntry(String stmtType,String status,String bankAccountNo,String uniqueRef);
+}

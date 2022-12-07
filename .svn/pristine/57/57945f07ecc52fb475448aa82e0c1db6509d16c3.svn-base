@@ -1,0 +1,78 @@
+package com.brs.service;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.brs.entities.BrsBankStatementLineStg;
+import com.brs.repository.BrsBankStmtLineStgRepository;
+
+@Service
+public class BrsBankStmtServiceImpl implements BrsBankStmtService {
+
+	@Autowired
+	private BrsBankStmtLineStgRepository repo;
+
+	@Override
+	public List<BrsBankStatementLineStg> getBrsBankStmtData(String uniqueRefNo, String bankAcNo, String processFlag) {
+		return repo.getBrsBankStmtData(uniqueRefNo, bankAcNo, processFlag);
+	}
+
+	@Override
+	public List<BrsBankStatementLineStg> saveBankList(List<BrsBankStatementLineStg> brsBankList) {
+		return repo.saveAllAndFlush(brsBankList);
+	}
+
+	@Override
+	public List<BrsBankStatementLineStg> getUnprocessedRecords(String processFlag) {
+		return repo.getUnprocessedRecords(processFlag);
+	}
+
+	@Override
+	public List<BrsBankStatementLineStg> getBrsBankStmtData(String uniqueRefNo, String bankAcNo,Long loaderProcessId,String uniqueRefNo1, String bankAcNo1,Long loaderProcessId1) {
+//		return repo.getBrsBankStmtData(uniqueRefNo, bankAcNo, uniqueRefNo1, bankAcNo1);
+		
+		System.out.println("BANK A/C NO : "+bankAcNo+" UNIQUE REF : "+uniqueRefNo+" Loader Process Id : "+loaderProcessId);
+		return repo.getBrsBankStmtData(uniqueRefNo, bankAcNo, loaderProcessId,uniqueRefNo1, bankAcNo1,loaderProcessId1);
+		
+		
+//		List<BrsBankStatementLineStg> list=new ArrayList<BrsBankStatementLineStg>();
+//		List<BrsBankStatementLineStg> stmtList=repo.getBrsBankStmtData(uniqueRefNo, bankAcNo, uniqueRefNo1, bankAcNo1);
+		
+//		Comparator<BrsBankStatementLineStg> comp=new Comparator<BrsBankStatementLineStg>() {
+//			@Override
+//			public int compare(BrsBankStatementLineStg o1, BrsBankStatementLineStg o2) {
+//				return o2.getLoaderProcessId().compareTo(o1.getLoaderProcessId());
+//			}
+//		};
+//		Collections.sort(stmtList,comp);
+		
+		
+		
+		
+//		return list;
+		
+		
+	}
+
+	@Override
+	public Long getLoaderProcessId(String uniqueRefNo, String bankAcNo) {
+		return repo.getLoaderProcessId(uniqueRefNo, bankAcNo);
+	}
+
+	@Override
+	public List<BrsBankStatementLineStg> getBrsBankStmtData(String uniqueRefNo, String bankAcNo, Long loaderProcessId) {
+		return repo.getBrsBankStmtData(uniqueRefNo, bankAcNo, loaderProcessId);
+	}
+
+	@Override
+	public List<BrsBankStatementLineStg> getBrsUnreconBankStmtData(String uniqueRefNo, String bankAcNo,Long loaderProcessId) {
+		return repo.getBrsUnreconBankStmtData(uniqueRefNo, bankAcNo, loaderProcessId);
+	}
+
+}

@@ -1,0 +1,40 @@
+package com.brs.batch;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.support.ListItemWriter;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.brs.entities.BrsConsoldtStg;
+import com.brs.repository.BrsConsoldtStgRepository;
+
+public class BrsDataItemWriter extends ListItemWriter<List<BrsConsoldtStg>>
+		implements ItemWriter<List<BrsConsoldtStg>> {
+
+	@Autowired
+	private BrsConsoldtStgRepository repo;
+	
+	Logger log = LoggerFactory.getLogger(BrsDataItemWriter.class);
+
+	@Override
+	public void write(List<? extends List<BrsConsoldtStg>> items) throws Exception {
+
+		List<BrsConsoldtStg> brsList = new ArrayList<>();
+
+		for (List<BrsConsoldtStg> list : items) {
+			brsList.addAll(list);
+		}
+
+		for (BrsConsoldtStg obj : brsList) {
+			obj.setProcessFlag("Y");
+		}
+		
+		log.info("brsList : "+brsList.size());
+
+		repo.saveAllAndFlush(brsList);
+	}
+}

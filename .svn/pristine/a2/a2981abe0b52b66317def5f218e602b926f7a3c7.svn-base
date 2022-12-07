@@ -1,0 +1,32 @@
+package com.brs.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.brs.entities.BrsBankStatementLineStg;
+import com.brs.repository.BrsBankStmtLineStgRepository;
+
+@Service
+public class BrsBankStmtServiceImpl implements BrsBankStmtService {
+
+	@Autowired
+	private BrsBankStmtLineStgRepository repo;
+
+	@Override
+	public List<BrsBankStatementLineStg> getBrsBankStmtData(String uniqueRefNo, String bankAcNo, String processFlag) {
+		return repo.getBrsBankStmtData(uniqueRefNo, bankAcNo, processFlag);
+	}
+
+	@Override
+	public List<BrsBankStatementLineStg> saveBankList(List<BrsBankStatementLineStg> brsBankList) {
+		return repo.saveAllAndFlush(brsBankList);
+	}
+
+	@Override
+	public List<BrsBankStatementLineStg> getUnprocessedRecords(String processFlag) {
+		return repo.getUnprocessedRecords(processFlag);
+	}
+
+}

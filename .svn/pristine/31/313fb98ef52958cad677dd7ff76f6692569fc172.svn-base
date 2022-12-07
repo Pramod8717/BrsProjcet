@@ -1,0 +1,72 @@
+package com.brs.scheduler;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Set;
+
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor;
+import org.springframework.scheduling.config.ScheduledTask;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+@CrossOrigin(origins = "*")
+@RestController
+public class SchedulerController {
+	private static final String SCHEDULED_TASKS = "scheduledTasks";
+
+	@Autowired
+	private ScheduledAnnotationBeanPostProcessor postProcessor;
+
+	@Autowired
+	private SchedulerConfig schedulerConfiguration;
+
+	@Autowired
+	JobLauncher jobLauncher;
+
+	@Autowired
+	Job job;
+
+	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+
+	@GetMapping(value = "/stop")
+	public String stopSchedule() throws JobExecutionAlreadyRunningException, JobRestartException,
+			JobInstanceAlreadyCompleteException, JobParametersInvalidException {
+
+		postProcessor.postProcessBeforeDestruction(schedulerConfiguration, SCHEDULED_TASKS);
+		return "Job Stopped";
+	}
+
+	@GetMapping(value = "/start")
+	public String startSchedule() throws JobExecutionAlreadyRunningException, JobRestartException,
+			JobInstanceAlreadyCompleteException, JobParametersInvalidException {
+
+		JobParameters jobParameters = new JobParametersBuilder()
+				.addString("time", format.format(Calendar.getInstance().getTime())).toJobParameters();
+		schedulerConfiguration.jobLauncher.run(job, jobParameters);
+
+		return "Job Completed";
+	}
+
+	@GetMapping(value = "/list")
+	public String listSchedules() throws JsonProcessingException {
+		Set<ScheduledTask> setTasks = postProcessor.getScheduledTasks();
+		if (!setTasks.isEmpty()) {
+			return setTasks.toString();
+		} else {
+			return "Currently no scheduler tasks are running";
+		}
+	}
+
+}

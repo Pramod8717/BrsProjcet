@@ -1,0 +1,17 @@
+package com.brs.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import com.brs.entities.BrsBankStmtHeaderStg;
+
+@Repository
+public interface BrsBankStmtHeaderRepository extends JpaRepository<BrsBankStmtHeaderStg, Long> {
+	
+	@Query(value = "select * from UAT_XXCD_BANK_STMT_HDR_STG b where bank_account_num = ? and statement_date=(?,'DD-MM-YY') and loader_process_id =(select max(loader_process_id) from UAT_XXCD_BANK_STMT_HDR_STG where BANK_ACCOUNT_NUM = b.BANK_ACCOUNT_NUM and statement_date=b.statement_date ) ", nativeQuery = true)
+	BrsBankStmtHeaderStg getBankHeaderList(String bankAccountNum,String stmtDate);
+	
+	@Query(value = "select * from UAT_XXCD_BANK_STMT_HDR_STG b where bank_account_num = ? and statement_date= to_date(to_char(sysdate-48)) and loader_process_id =(select max(loader_process_id) from UAT_XXCD_BANK_STMT_HDR_STG where BANK_ACCOUNT_NUM = b.BANK_ACCOUNT_NUM and statement_date=b.statement_date ) ", nativeQuery = true)
+	BrsBankStmtHeaderStg getBankHeaderList(String bankAccountNum);
+}

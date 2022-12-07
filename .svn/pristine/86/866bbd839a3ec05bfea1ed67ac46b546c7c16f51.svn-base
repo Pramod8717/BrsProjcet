@@ -1,0 +1,209 @@
+package com.brs.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.brs.batch.unreconreader.BrsInfo;
+import com.brs.batch.updateunqref.UpdateUnqRef;
+import com.brs.entities.BrsConsoldtStg;
+
+@Repository
+public interface BrsConsoldtStgRepository extends JpaRepository<BrsConsoldtStg, Long> {
+
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where process_flag='N' and BANK_ACCOUNT_NO is not null and ROWNUM <= 1 order by id,bank_account_no,system", nativeQuery = true)
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where process_flag='N' and ROWNUM <= 1", nativeQuery = true)
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where process_flag='N' and VOUCHERDATE = to_date(to_char(sysdate-1)) and ROWNUM <= 1", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='N' and VOUCHERDATE = to_date(to_char(sysdate-48)) and ROWNUM <= 1", nativeQuery = true)
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='N' and VOUCHERDATE = TO_DATE('04-07-22','DD-MM-YY') and ROWNUM <= 1", nativeQuery = true)
+	BrsConsoldtStg getBrsConsoldtStgData();
+	
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='N' and BANK_ACCOUNT_NO = ? AND VOUCHERDATE = TO_DATE(?, 'DD-MM-YY') and ROWNUM <= 1", nativeQuery = true)
+	BrsConsoldtStg getBrsConsoldtStgData(String bankAccountNo,String voucherDate);
+	
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='N' and BANK_ACCOUNT_NO = ?  and ROWNUM <= 1", nativeQuery = true)
+	BrsConsoldtStg getBrsConsoldtStgData(String bankAccountNo);
+	
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='N' AND VOUCHERDATE = TO_DATE(?, 'DD-MM-YY') and ROWNUM <= 1", nativeQuery = true)
+	BrsConsoldtStg getBrsConsoldtStgData1(String voucherDate);
+
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where process_flag='N' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ? ", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='N' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ? ", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsChequeRecords(String uniqueRefNo,String bankAccountNo);
+
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where UNIQUE_REFERENCE = ? ", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where UNIQUE_REFERENCE = ? ", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsDDRecords(String uniqueRefNo);
+
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where utr_no = ?", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where utr_no = ?", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsFundTransferRecords(String uniqueRefNo);
+
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where UNIQUE_REFERENCE = ? ", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where UNIQUE_REFERENCE = ? ", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsCashRecords(String uniqueRefNo);
+
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where CHEQ_ID = ?", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where CHEQ_ID = ?", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsRecordsByChequeId(long chequeId);
+
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where cheq_id = ? and bank_account_no = ?", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where cheq_id = ? and bank_account_no = ?", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsRecordstoUpdateRefId(long chequeId, String bankAcNum);
+
+	@Query(value = "select SEQ_MTCH_REF.nextval from dual", nativeQuery = true)
+	Long getMtchRefId();
+
+	@Query(value = "select SEQ_BKC_REF.nextval from dual", nativeQuery = true)
+	Long getBkcRefId();
+
+	@Query(value = "select SEQ_BNKC_REF.nextval from dual", nativeQuery = true)
+	Long getBnkcRefId();
+	
+	@Query(value = "select SEQ_UNMTCH_REF.nextval from dual", nativeQuery = true)
+	Long getUnmtchRefId();
+	
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where  process_flag='N' and BANK_ACCOUNT_NO = ? AND VOUCHERDATE = TO_DATE(?, 'DD-MM-YY') ", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='N' and BANK_ACCOUNT_NO = ? AND VOUCHERDATE = TO_DATE(?, 'DD-MM-YY') ", nativeQuery = true)
+	List<BrsConsoldtStg> getDayWiseBrsConsoldtStgRecords(String bankAccountNo,String date);
+	
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where process_flag='N' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ? "
+//			+ "Union "
+//			+ "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where status='Unreconciled' and process_flag='Y' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ?", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='N' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ? "
+			+ "Union "
+			+ "select * from UAT_XXCD_BRS_CONSOLDT_STG where status='Unreconciled' and process_flag='Y' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ?", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsRecords(String uniqueRefNo,String bankAccountNo,String uniqueRefNo1,String bankAccountNo1);
+	
+	
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where process_flag='N' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ? ", nativeQuery = true)
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='N' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ? ", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsRecords(String uniqueRefNo,String bankAccountNo);
+	
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG_1 where status='Unreconciled' and process_flag='Y' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ?", nativeQuery = true)
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where status='Unreconciled' and process_flag='Y' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ?", nativeQuery = true)
+//	List<BrsConsoldtStg> getBrsUnreconRecords(String uniqueRefNo,String bankAccountNo);
+	
+//	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where status='Unreconciled' and process_flag='Y' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ? "
+//			+ "UNION "
+//			+ "select * from UAT_XXCD_BRS_CONSOLDT_STG where status='Unreconciled' and process_flag='R' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ?", nativeQuery = true)
+//	List<BrsConsoldtStg> getBrsUnreconRecords(String uniqueRefNo,String bankAccountNo,String uniqueRefNo1,String bankAccountNo1);
+	
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where status='Unreconciled' and process_flag IN ('Y','R') and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ? and id >0 "
+			+ "Union "
+			+ "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='N' and UNIQUE_REFERENCE = ? AND BANK_ACCOUNT_NO = ? and id >0 ", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsUnreconRecords(String uniqueRefNo,String bankAccountNo,String uniqueRefNo1,String bankAccountNo1);
+	
+	
+	
+	@Query(value = "select Distinct BANK_ACCOUNT_NO  from UAT_XXCD_BRS_CONSOLDT_STG where BANK_ACCOUNT_NO is not null", nativeQuery = true)
+	List<String> getBankAccountNumberList();
+	
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='R' and status='Unreconciled' and VOUCHERDATE BETWEEN TRUNC(to_date(to_char(sysdate-48)), 'MM') AND  to_date(to_char(sysdate-48)) and ROWNUM <= 1", nativeQuery = true)
+	BrsConsoldtStg getBrsUnreconRecords();
+	
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='R' and status='Unreconciled' and VOUCHERDATE BETWEEN TRUNC(to_date(to_char(?, 'DD-MM-YY'), 'MM') AND TO_DATE(?, 'DD-MM-YY') and ROWNUM <= 1", nativeQuery = true)
+	BrsConsoldtStg getBrsUnreconRecords3(String date,String date1);
+	
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='R' and status='Unreconciled' AND BANK_ACCOUNT_NO = ?  and ROWNUM <= 1", nativeQuery = true)
+	BrsConsoldtStg getBrsUnreconRecords1(String bankAccountNo);
+	
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where process_flag='R' and status='Unreconciled' AND BANK_ACCOUNT_NO = ?  and VOUCHERDATE BETWEEN TRUNC(to_date(to_char(?, 'DD-MM-YY'), 'MM') AND TO_DATE(?, 'DD-MM-YY') and ROWNUM <= 1", nativeQuery = true)
+	BrsConsoldtStg getBrsUnreconRecords2(String bankAccountNo,String date,String date1);
+	
+	@Transactional
+	@Modifying
+	@Query(value = "update UAT_XXCD_BRS_CONSOLDT_STG set process_flag=? where status='Unreconciled' and process_flag='Y' and VOUCHERDATE BETWEEN TRUNC(to_date(to_char(sysdate-48)), 'MM') AND  to_date(to_char(sysdate-48)) and unique_reference is not null and cheq_id is not null", nativeQuery = true)
+	void updateStatusOfUnreconciledRecord(String status);
+	
+	@Transactional
+	@Modifying
+	@Query(value = "update UAT_XXCD_BRS_CONSOLDT_STG set process_flag=? where status='Unreconciled' and process_flag='Y' and VOUCHERDATE BETWEEN TRUNC(to_date(to_char(?, 'DD-MM-YY'), 'MM') AND TO_DATE(?, 'DD-MM-YY') and unique_reference is not null and cheq_id is not null", nativeQuery = true)
+	void updateStatusOfUnreconciledRecord(String status,String date,String date1);
+	
+	//In user if only bank account  is used 2nd
+	@Transactional
+	@Modifying
+	@Query(value = "update UAT_XXCD_BRS_CONSOLDT_STG set process_flag=? where status='Unreconciled' and process_flag='Y' AND BANK_ACCOUNT_NO = ? and VOUCHERDATE BETWEEN TRUNC(to_date(to_char(sysdate-48)), 'MM') AND TO_DATE(to_char(sysdate-48)) and unique_reference is not null and cheq_id is not null", nativeQuery = true)
+	void updateStatusOfUnreconciledRecord1(String status,String bankAccountNo);
+	
+	//In user if both bank account and date is used 1st
+	@Transactional
+	@Modifying
+	@Query(value = "update UAT_XXCD_BRS_CONSOLDT_STG set process_flag=? where status='Unreconciled' and process_flag='Y' AND BANK_ACCOUNT_NO = ? and VOUCHERDATE BETWEEN TRUNC(to_date(?, 'DD-MM-YY'), 'MM') AND TO_DATE(?, 'DD-MM-YY') and unique_reference is not null and cheq_id is not null", nativeQuery = true)
+	void updateStatusOfUnreconciledRecord(String status,String bankAccountNo,String date,String date1);
+	
+//	//In use , if only bank account num is used
+//	@Transactional
+//	@Modifying
+//	@Query(value = "update UAT_XXCD_BRS_CONSOLDT_STG set process_flag='Y', status='Unreconciled', ERROR_MESG= ? where BANK_ACCOUNT_NO = ? and VOUCHERDATE = to_date(to_char(sysdate-48)) and process_flag='N' ", nativeQuery = true)
+//	void updateBrsRecord(String errorMsg,String bankAccNum);
+//	
+	
+	//In use, if both bank account and date is present
+	@Transactional
+	@Modifying
+	@Query(value = "update UAT_XXCD_BRS_CONSOLDT_STG set process_flag='Y', status='Unreconciled', ERROR_MESG= ? where BANK_ACCOUNT_NO = ? and VOUCHERDATE = TO_DATE(?, 'DD-MM-YY') and process_flag='N' ", nativeQuery = true)
+	void updateBrsRecord(String errorMsg,String bankAccNum,String date);
+	
+//	@Transactional
+//	@Modifying
+//	@Query(value = "update UAT_XXCD_BRS_CONSOLDT_STG set process_flag='Y', status='Unreconciled', ERROR_MESG= ? where VOUCHERDATE = TO_DATE(?, 'DD-MM-YY') ", nativeQuery = true)
+//	void updateBrsRecord1(String errorMsg,String date);
+//		
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where  BANK_ACCOUNT_NO = ? and cheq_id  = ? and ROWNUM <= 1", nativeQuery = true)
+	BrsConsoldtStg getBrsRecordsWithNoUnqRef(String bankAccNum,Long cheqId);
+	
+	@Query(value = "select bank_account_no,cheq_id from UAT_XXCD_BRS_CONSOLDT_STG where unique_reference is null and cheq_id is not null and process_flag IN ('N','R') and VOUCHERDATE BETWEEN TRUNC(to_date(to_char(sysdate-48)), 'MM') AND  to_date(to_char(sysdate-48)) group by bank_account_no,cheq_id order by bank_account_no,cheq_id", nativeQuery = true)
+	List<UpdateUnqRef> getBrsRecordsWithNoUnqRefSummary();
+	
+	@Query(value = "select bank_account_no,cheq_id from UAT_XXCD_BRS_CONSOLDT_STG where unique_reference is null and cheq_id is not null  and process_flag IN ('N','R') and BANK_ACCOUNT_NO = ? and VOUCHERDATE BETWEEN TRUNC(to_date(?, 'DD-MM-YY'), 'MM') AND TO_DATE(?, 'DD-MM-YY') group by bank_account_no,cheq_id order by bank_account_no,cheq_id", nativeQuery = true)
+	List<UpdateUnqRef> getBrsRecordsWithNoUnqRefSummary(String bankAccNum,String date,String date1);
+	
+	
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where  ID = ? and ROWNUM <= 1", nativeQuery = true)
+	BrsConsoldtStg getBrsRecordsById(Long id);
+	
+	@Query(value = "select Id from UAT_XXCD_BRS_CONSOLDT_STG where bank_account_no is null and process_flag IN ('N','R') and VOUCHERDATE BETWEEN TRUNC(to_date(to_char(sysdate-48)), 'MM') AND TO_DATE(to_char(sysdate-48)) "
+			+ "Union "
+			+ "select Id from UAT_XXCD_BRS_CONSOLDT_STG where unique_reference is null and cheq_id is null and process_flag IN ('N','R') and VOUCHERDATE BETWEEN TRUNC(to_date(to_char(sysdate-48)), 'MM') AND TO_DATE(to_char(sysdate-48)) ", nativeQuery = true)
+	List<Long> getBrsRecordsWithNoBankDetails();
+	
+	@Query(value = "select Id from UAT_XXCD_BRS_CONSOLDT_STG where bank_account_no is null and process_flag IN ('N','R') and VOUCHERDATE BETWEEN TRUNC(to_date(?, 'DD-MM-YY'), 'MM') AND TO_DATE(?, 'DD-MM-YY') "
+			+ "Union "
+			+ "select Id from UAT_XXCD_BRS_CONSOLDT_STG where unique_reference is null and cheq_id is null and process_flag IN ('N','R') and bank_account_no = ? and VOUCHERDATE BETWEEN TRUNC(to_date(?, 'DD-MM-YY'), 'MM') AND TO_DATE(?, 'DD-MM-YY') ", nativeQuery = true)
+	List<Long> getBrsRecordsWithNoBankDetails(String date,String date1,String bankAccNum,String date3,String date4);
+	
+	
+	@Query(value = "select * from UAT_XXCD_BRS_CONSOLDT_STG where  bank_account_no = ? and unique_reference = ? and ROWNUM <= 1", nativeQuery = true)
+	BrsConsoldtStg getBrsRecordsWithBnkNumAndUnqRef(String bacnkAccNum,String uniqueRef);
+	
+//	@Query(value = "select bank_account_no,unique_reference from uat_xxcd_brs_consoldt_stg where bank_account_no is not null and unique_reference is not null and process_flag = ? and VOUCHERDATE = TO_DATE(to_char(sysdate-48)) group by bank_account_no,unique_reference order by bank_account_no,unique_reference ", nativeQuery = true)
+//	List<BrsInfo> getBrsRecordsWithBnkNumAndUnqRefSummary(String status);
+//	
+//	@Query(value = "select bank_account_no,unique_reference from uat_xxcd_brs_consoldt_stg where bank_account_no is not null and unique_reference is not null and process_flag = ? and bank_account_no = ? and VOUCHERDATE = TO_DATE(?, 'DD-MM-YY')  group by bank_account_no,unique_reference order by bank_account_no,unique_reference ", nativeQuery = true)
+//	List<BrsInfo> getBrsRecordsWithBnkNumAndUnqRefSummary(String status,String bankAccNum,String date);
+	
+	
+//	@Query(value = "select * from uat_xxcd_brs_consoldt_stg where bank_account_no is not null and unique_reference is not null and process_flag = ? and VOUCHERDATE = TO_DATE(to_char(sysdate-48)) group by bank_account_no,unique_reference order by bank_account_no,unique_reference ", nativeQuery = true)
+	@Query(value = "select * from uat_xxcd_brs_consoldt_stg where bank_account_no is not null and unique_reference is not null and process_flag = ? and VOUCHERDATE = TO_DATE(to_char(sysdate-48))  ", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsRecordsWithBnkNumAndUnqRefSummary(String status);
+	
+//	@Query(value = "select * from uat_xxcd_brs_consoldt_stg where bank_account_no is not null and unique_reference is not null and process_flag = ? and bank_account_no = ? and VOUCHERDATE = TO_DATE(?, 'DD-MM-YY')  group by bank_account_no,unique_reference order by bank_account_no,unique_reference ", nativeQuery = true)
+	@Query(value = "select * from uat_xxcd_brs_consoldt_stg where bank_account_no is not null and unique_reference is not null and process_flag = ? and bank_account_no = ? and VOUCHERDATE = TO_DATE(?, 'DD-MM-YY') ", nativeQuery = true)
+	List<BrsConsoldtStg> getBrsRecordsWithBnkNumAndUnqRefSummary(String status,String bankAccNum,String date);
+	
+	@Query(value = "select bank_account_no,unique_reference from uat_xxcd_brs_consoldt_stg where bank_account_no is not null and unique_reference is not null and process_flag = ? and VOUCHERDATE BETWEEN TRUNC(to_date(to_char(sysdate-48)), 'MM') AND TO_DATE(to_char(sysdate-48))  group by bank_account_no,unique_reference order by bank_account_no,unique_reference ", nativeQuery = true)
+	List<BrsInfo> getBrsUnreconciledRecordsWithBnkNumAndUnqRefSummary(String status);
+	
+	@Query(value = "select bank_account_no,unique_reference from uat_xxcd_brs_consoldt_stg where bank_account_no is not null and unique_reference is not null and process_flag = ? and bank_account_no = ? and VOUCHERDATE BETWEEN TRUNC(to_date(?, 'DD-MM-YY'), 'MM') AND TO_DATE(?, 'DD-MM-YY') group by bank_account_no,unique_reference order by bank_account_no,unique_reference ", nativeQuery = true)
+	List<BrsInfo> getBrsUnreconciledRecordsWithBnkNumAndUnqRefSummary(String status,String bankAccNum,String date,String date1);
+	
+	@Query(value = "select count(*) as count from UAT_XXCD_BRS_CONSOLDT_STG where BANK_ACCOUNT_NO=? and voucherdate =TO_DATE(?, 'DD-MM-YY') and (process_flag is null or process_flag IN('N','R') or (process_flag ='Y' and status='Unreconciled')) ", nativeQuery = true)
+	Long getCountOfInProcessRecord(String bankAccNum,String date);
+	
+}

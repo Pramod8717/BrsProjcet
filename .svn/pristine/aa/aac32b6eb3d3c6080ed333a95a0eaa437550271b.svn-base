@@ -1,0 +1,164 @@
+
+package com.brs.entities;
+
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@Entity
+//@Table(name = "UAT_XXCD_BRS_CONSOLDT_STG_C")
+@Table(name = "UAT_XXCD_BRS_CONSOLDT_STG_1")
+//@Table(name = "UAT_XXCD_BRS_CONSOLDT_STG")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+public class BrsConsoldtStg {
+
+	@Id
+	@Column(name = "ID")
+	private Long id;
+
+	@Column(name = "BANK_ACCOUNT_NO")
+//	@Column(name = "BANK_ACCOUNT_NUM")
+	private String bankAcNo;
+
+	@Column(name = "SYSTEM")
+//	@Column(name = "`SYSTEM`")
+	private String system;
+
+	@Column(name = "VOUCHERID")
+	private String voucherId;
+
+	@Temporal(value = TemporalType.DATE)
+	@Column(name = "VOUCHERDATE")
+	private Date voucherDate;
+
+	@Temporal(value = TemporalType.DATE)
+	@Column(name = "VALUEDATE")
+	private Date valueDate;
+
+	@Column(name = "BRANCHID")
+	private String branchId;
+
+	@Column(name = "PROPOSALID")
+	private String proposalId;
+
+	@Column(name = "AGREEMENTNO")
+	private String agreementNo;
+
+	@Column(name = "GL_CODE")
+	private String glCode;
+
+	@Column(name = "GL_DESCRIPTION")
+	private String glDescription;
+
+	@Column(name = "DRAMT")
+	private Double drAmt;
+
+	@Column(name = "CRAMT")
+	private Double crAmt;
+
+	@Column(name = "NARRATION")
+	private String narration;
+
+	@Column(name = "STAGE_ID")
+	private String stageId;
+
+	@Column(name = "CHEQ_ID")
+	private Long cheqId;
+
+	@Column(name = "RECEIPT_NO")
+	private String receipt_No;
+
+	@Column(name = "RECEIPTNO")
+	private String receiptNo;
+
+	@Column(name = "CHEQUENUM")
+	private String chequeNum;
+
+	@Column(name = "PAYMENTMODE")
+	private String paymentMode;
+
+	@Column(name = "UTR_NO")
+	private String utrNo;
+
+	@Column(name = "PAYSLIPNO")
+	private String payslipNo;
+
+	@Column(name = "CHEQUE_STATUS")
+	private String chequeStatus;
+
+	@Temporal(value = TemporalType.DATE)
+	@Column(name = "REALIZATIONDATE")
+	private Date realizationDate;
+
+	@Column(name = "PROCESS_FLAG")
+	private String processFlag;
+
+	@Column(name = "SOURCE_SYSTEM")
+	private String sourceSystem;
+	
+	@Column(name = "UNIQUE_REFERENCE")
+	private String uniqueRef;
+	
+//	@Column(name = "MATCH_REFERENCE")
+//	private String matchRef;
+//
+//	@Column(name = "UNMATCH_REFERENCE")
+//	private String unmatchRef;
+	
+	@Column(name = "STATUS")
+	private String status;
+
+	@Column(name = "ERROR_MESG")
+	private String errorMsg;
+	
+	@Column(name = "JE_BATCH_ID")
+	private Long jeBatchId;
+
+	@Column(name = "PERIOD_NAME")
+	private String periodName;
+	
+	@Column(name = "JE_HEADER_ID")
+	private Long jeHeaderId;
+	
+	@Column(name = "JE_LINE_NUM")
+	private Long jeLineNum;
+	
+	@Column(name = "CHART_OF_ACCOUNTS_ID")
+	private Long chartOfAccountId;
+	
+	@Column(name = "FUNCTIONAL_CURRENCY_CODE")
+	private String funtionalCurrencyCode;
+	
+	@Column(name = "CODE_COMBINATION_ID")
+	private Long codeCombinationId;
+	
+	@Temporal(value = TemporalType.DATE)
+	@Column(name = "CREATION_DATE")
+	private Date creationDate;
+	
+	@Column(name = "CREATED_BY")
+	private Long createdBy;
+	
+	@Temporal(value = TemporalType.DATE)
+	@Column(name = "LAST_UPDATE_DATE")
+	private Date lastUpdateDate;
+	
+	@Column(name = "LAST_UPDATE_BY")
+	private Long lastUpdateBy;
+
+}

@@ -1,0 +1,14 @@
+package com.brs.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import com.brs.entities.BrsValidateStg;
+@Repository
+public interface BrsValidateStgRepository extends JpaRepository<BrsValidateStg, Long> {
+
+	
+	@Query(value = "select * from UAT_XXCD_BRS_VALIDATE_STG_1 where STATUS = ? and BANK_ACCOUNT_NO = ? and unique_reference = ?", nativeQuery = true)
+	BrsValidateStg getIdFromValidateTbl(String status,String bankAccountNo,String uniqueRef);
+}

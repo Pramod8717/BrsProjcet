@@ -1,0 +1,101 @@
+package com.brs.batch.bnkstmthdr;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.brs.entities.BrsBankStmtHeaderStg;
+import com.brs.repository.BrsBankStmtHeaderRepository;
+import com.brs.service.BrsBankStmtHeaderService;
+import com.brs.service.BrsBankStmtService;
+import com.brs.service.BrsDataService;
+import com.brs.util.AppConstants;
+import com.brs.util.BankStmtLineSummary;
+
+public class BankStmtHdrProcessor implements ItemProcessor<BrsBankStmtHeaderStg, List<Object>> {
+
+	SimpleDateFormat fmt = new SimpleDateFormat("dd-MM-YY");
+	
+	Logger log = LoggerFactory.getLogger(BankStmtHdrProcessor.class);
+	
+	@Autowired
+	private BrsBankStmtHeaderService bnkHdrService;
+	
+	@Autowired
+	private BrsBankStmtService bnkService;
+	
+	@Autowired
+	private BrsDataService brsStgService;
+	
+	@Autowired
+	BrsBankStmtHeaderRepository hdrRepo;
+	
+	@Override
+	public List<Object> process(BrsBankStmtHeaderStg bankHeader) throws Exception {
+		log.info("BankStmtHdrProcessor");
+		if(bankHeader!=null&&bankHeader.getId()!=null) {
+			String bankAccNum=bankHeader.getBankAcNo();
+			String date=fmt.format(bankHeader.getStmtDate());
+			log.info("BEFORE STMT DT : "+date +" STMT NUM : "+bankHeader.getStatementNo());
+			
+			Date stmtDt=new Date(bankHeader.getStmtDate().getTime());
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(stmtDt);
+			cal.add(Calendar.DATE, -1);
+			stmtDt=cal.getTime();
+			String stmtDtInStr=fmt.format(stmtDt);
+			
+			log.info("After STMT DT : "+stmtDtInStr);
+			
+			BrsBankStmtHeaderStg previousDayBankHeader=bnkHdrService.getBankHeaderList(bankAccNum,stmtDtInStr);
+			if(previousDayBankHeader!=null) {
+				log.info("Opening Balance : "+bankHeader.getCtrlBeginBalance() +" PREVIOUS DAY CLOSING BALANCE : "+previousDayBankHeader.getCtrlEndBalance());
+				if(previousDayBankHeader.getCtrlEndBalance().equals(bankHeader.getCtrlBeginBalance())) {
+					
+					List<BankStmtLineSummary> bankStmtLineSummary=bnkService.getBankStmtLineSummary(bankAccNum, bankHeader.getStatementNo());
+					if(bankStmtLineSummary!=null&&!bankStmtLineSummary.isEmpty()) {
+						Double totalCrAmount=0d;
+						Double totalDrAmount=0d;
+						
+						for(BankStmtLineSummary obj:bankStmtLineSummary) {
+							if(obj.getTxn_type().equalsIgnoreCase("CR")) {
+								totalCrAmount=totalCrAmount+obj.getAmount();
+							}else if(obj.getTxn_type().equalsIgnoreCase("DR")) {
+								totalDrAmount=totalDrAmount+obj.getAmount();
+							}
+						}
+						log.info("HDR TBL TOTAL CR AMOUNT : "+bankHeader.getCtrlTotalCr()+" TOTAL DR AMOUNT : "+bankHeader.getCtrlTotalDr());
+						log.info("LIN TBL TOTAL CR AMOUNT : "+totalCrAmount+" TOTAL DR AMOUNT : "+totalDrAmount);
+						
+						if(!bankHeader.getCtrlTotalCr().equals(totalCrAmount)||!bankHeader.getCtrlTotalDr().equals(totalDrAmount)) {
+							log.info("Bank Line and Bank HDR total CR/DR AMt not matched!!");
+							brsStgService.updateBrsRecord(AppConstants.ERR_MSG_BANK_HDR_LINE_CRDR_NM, bankAccNum, date);
+						}
+					}else {
+						log.info("Bank Line not found!!");
+						brsStgService.updateBrsRecord(AppConstants.ERR_MSG_BANK_LINE_NF, bankAccNum, date);
+					}
+				}else {
+					log.info("Bank Header Opening/Closing balance not matched!!");
+					brsStgService.updateBrsRecord(AppConstants.ERR_MSG_BANK_HDR_OPN_BAL_CLO_BAl, bankAccNum, date);
+				}
+			}else {
+				log.info("Previouse Day Bank Header not found!!");
+				brsStgService.updateBrsRecord(AppConstants.ERR_MSG_BANK_HDR_NF_FOR_PREV_DAY, bankAccNum, date);
+			}
+			
+			bankHeader.setProcessFlag("Y");
+			hdrRepo.save(bankHeader);
+			
+		}
+		
+		return null;
+	}
+
+}

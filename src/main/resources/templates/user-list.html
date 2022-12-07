@@ -1,0 +1,162 @@
+<!-- 
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org/">
+<head> <th:block th:include="fragments/head :: myheader"></th:block>
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+	integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+	crossorigin="anonymous" /> 
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<head><meta charset="UTF-8" />
+</head> 
+<style>
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+}
+
+li {
+  float: left;
+}
+
+li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+li a:hover:not(.active) {
+  background-color: #111;
+}
+
+.active {
+  background-color: #04AA6D;
+}
+</style>
+
+
+
+<ul>
+  <li><a href="#home">Run Job</a></li>
+  <li><a href="#news">Job Status</a></li>
+  
+  
+</ul>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+	<ul>
+  <li><a href="default.asp">Run Job</a></li>
+  <li><a href="news.asp">Job Status</a></li>
+ 
+</ul>
+</head>
+
+
+<h1>The Window Object</h1>
+<h2>The alert() Method</h2>
+
+<p>Click the button to display an alert box.</p>
+
+<button onclick="myFunction()">Try it</button>
+
+
+<script>
+async function myFunction() {
+	
+	//let response = await fetch('http://localhost:9595/brs/api/executebrs/40310005866/2022-06-08');
+	//let res = await response.json();
+
+	//console.log(res);
+	
+  /* alert("Hello! I am an alert box!"); */
+  fetch('http://localhost:9595/brs/api/executebrs/{bankAccountNo}/{date}')
+  .then(response => response.text())
+  .then(data => {
+	  console.log(data)
+	  //console.log(json.status)
+	  alert(data)
+  })
+  }
+
+</script>
+
+<style>
+
+.ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+</style>
+
+<body style="border: 4px solid rgb(0, 128, 28);">
+<div class="form-row">
+		<div class="col-75">
+			<div class="container">
+
+	<form class="was-validated" action="/joblistfromdb/{bankAccountNo}/{voucherDate}" method="GET" >
+			<div class="form-group">
+			<div class="col">
+
+				<label for="Account Number"><i class="fa fa-user"></i>
+					Account Number</label> <input type="number" class="form-control"
+					id="bankAccountNo" name="bankAccountNo" placeholder="Enter here"
+					required>
+				<div class="valid-feedback">Valid.</div>
+				<div class="invalid-feedback">Please fill out this field.</div>
+			</div>
+		</div>
+
+		<br>
+		<div class="form-group">
+			<div class="col">
+
+				<label for="date">Date :</label> <input type="date"
+					class="form-control" placeholder="YYYY-MM-DD" name="voucherDate" id="voucherDate" required>
+				<div class="valid-feedback">Valid.</div>
+				<div class="invalid-feedback">Please fill out this field.</div>
+				<br><br>
+					<!-- <button onclick="myFunction()">GO::</button>
+					<button type="submit">GO::</button>
+			</div>
+		</div>
+</form>
+	</div>
+	</div>
+	</div>
+	
+<body>
+
+<header th:include="header::header1"></header>
+<navbar th:include="navigations::navbar1"></navbar>
+</body>
+</html>
+ -->

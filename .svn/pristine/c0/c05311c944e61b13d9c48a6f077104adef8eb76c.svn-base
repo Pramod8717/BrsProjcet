@@ -1,0 +1,73 @@
+package com.brs.batch;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.support.ListItemWriter;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.brs.entities.BrsConsoldtStg;
+import com.brs.entities.BrsError;
+import com.brs.repository.BrsConsoldtStgRepository;
+import com.brs.repository.BrsErrorRepository;
+import com.brs.util.BrsDataUtil;
+
+public class BrsDataItemWriter extends ListItemWriter<List<BrsConsoldtStg>>
+		implements ItemWriter<List<BrsConsoldtStg>> {
+
+	@Autowired
+	private BrsConsoldtStgRepository repo;
+	
+	@Autowired
+	private BrsDataUtil util;
+	
+	@Autowired
+	private BrsErrorRepository errorRepo;
+	
+	Logger log = LoggerFactory.getLogger(BrsDataItemWriter.class);
+
+	@Override
+	public void write(List<? extends List<BrsConsoldtStg>> items){
+		List<BrsConsoldtStg> brsList = new ArrayList<>();
+		try {
+	
+			for (List<BrsConsoldtStg> list : items) {
+				brsList.addAll(list);
+			}
+	
+			for (BrsConsoldtStg obj : brsList) {
+				obj.setProcessFlag("Y");
+			}
+			
+			log.info("brsList : "+brsList.size());
+	
+			repo.saveAllAndFlush(brsList);
+		
+		}catch(Exception e) {
+			
+			Long refId=null;
+			String bankAcNo="";
+			String uniqueRefNo="";
+			
+			if(!brsList.isEmpty()) {
+				refId=brsList.get(0).getId();
+				bankAcNo=brsList.get(0).getBankAcNo();
+				uniqueRefNo=brsList.get(0).getUniqueRef();
+			}
+			
+			
+			BrsError error=util.getErrorDetails("Book Update", refId, bankAcNo, uniqueRefNo, e.getMessage());
+			errorRepo.save(error);
+			log.error(error.toString(), e);
+		}
+	}
+	
+	
+	public void writeBRS(List<BrsConsoldtStg> brsList) {
+		log.info("writeBRS, brsList : "+brsList.size());
+		repo.saveAllAndFlush(brsList);
+	}
+}

@@ -1,0 +1,327 @@
+<!-- 
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+CDN of Bootstrap
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+<script
+	src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.slim.min.js"></script>
+<script
+	src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+	integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+	crossorigin="anonymous" />
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+CDN of google font
+<style>
+@import url(
+'https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500&display=swap')
+	;
+
+@import url(
+'https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;500&display=swap')
+	;
+
+/* 
+	.popup .overlay {
+		position:fixed;
+		top:0px;
+		left:0px;
+		width:100vw;
+		height:100vh;
+		background:rgba(0,0,0,0,7);
+		z-index:1;
+		display:none;
+	}
+	
+	.popup .content {
+		position:absolute;
+		top:50px;
+		left:50px;
+		transform:translate(-50%,-50%) scale(0);
+		background:#fff;
+		width:450px;
+		height:220px;
+		z-index:2;
+		text-align: center;
+		padding:20px;
+		box-sizing:border-box;
+				
+	}
+	
+	.popup .close-btn {
+	cursor:pointer;
+	position:absolute;
+	top:20px;
+		right:20px;
+	width:30px;
+	height:30px;
+		background:#222;
+		color:#fff;
+		font-size:25px;
+		
+		font-weight:600;
+		font-height:30px;
+		text-align: center;
+		border-redius:50%;
+	
+	}
+	
+	.popup .active .overlay{
+	display:block;
+	
+	
+	}
+	
+	.popup .active .content{
+	transition:all 300ms ease-in-out;
+	transform:translate(-50%,-50%) scale(1);
+	
+	
+	}
+ */
+.form-control {
+	display: inline-block;
+	vertical-align: middle;
+	float: none;
+}
+
+.dialog {
+	width: 40%;
+}
+</style>
+
+</head>
+<br>
+<body style="border: 4px solid rgb(0, 128, 28);">
+	<div class="form-row">
+		<div class="col-75">
+			<div class="container">
+				<form class="was-validated"
+					action="" method="GET">
+					<div class="form-group">
+						<div class="col">
+
+							<label for="Account Number"><i class="fa fa-user"></i>
+								Account Number</label> <input type="number" class="form-control"
+								id="bankAccountNo" name="bankAccountNo" placeholder="Enter here"
+								required>
+							<div class="valid-feedback">Valid.</div>
+							<div class="invalid-feedback">Please fill out this field.</div>
+						</div>
+					</div>
+
+					<br>
+					<div class="form-group">
+						<div class="col">
+
+							<label for="date">Date :</label> <input type="date"
+								class="form-control" placeholder="YYYY-MM-DD" name="date" required>
+							<div class="valid-feedback">Valid.</div>
+							<div class="invalid-feedback">Please fill out this field.</div>
+							<br>
+
+
+
+							<div>
+								<dialog id="DialogExample">
+								<p>BRS process has been started..</p>
+								<button id="hide">Close dialog text</button>
+								</dialog>
+								<button id="show" onclick="onSubmit()">GO</button>
+								<br>
+								<br>
+								<button id="ajax">API CALL</button>
+							</div>
+							<script type="text/JavaScript">
+							
+							function onSubmit(){
+								alert("ankit")
+							}
+							
+							 function getConfirmation() {
+					               var retVal = confirm("Do you want to continue ?");
+					               if( retVal == true ) {
+					                  document.write ("User wants to continue!");
+					                  return true;
+					               } else {
+					                  document.write ("User does not want to continue!");
+					                  return false;
+					               }
+					            }
+      (function() { var dialog = document.getElementById('DialogExample'); 
+     /*  document.getElementById('show').onclick = function(getConfirmation()) { dialog.show(); }; */
+   /*    document.getElementById('hide').onclick = function() { dialog.close(); }; })(); */
+      
+      
+    /*   
+      $.ajax({ 
+    	   type: "GET",
+    	   dataType: "jsonp",
+    	   url: "http://localhost:9595/brs/api/executebrs/{bankAccountNo}/{date}",
+    	   success: function(data){        
+    	     alert(data);
+    	   }
+    	});
+      
+       */
+      
+      
+      
+      
+   /*    $(document).ready(function() {
+    	    $.ajax({
+    	        url: "http://localhost:9595/brs/api/executebrs/{bankAccountNo}/{date}"
+    	    }).then(function(data) {
+    	       $('.greeting-bankAccountNo').append(data.bankAccountNo);
+    	       $('.greeting-date').append(data.date);
+    	    });
+    	    
+    	    error: function(response) {
+    	        loaderFunction(false);
+    	       }
+    	       
+    	});
+      
+       
+       
+       
+       $('#submitForm').on('click' , function(){
+
+           var markers = {
+               "bankAccountNo": $('#bankAccountNo').val(),
+              
+               "date": $('#date').val().toString(),
+              
+           };
+
+           $.ajax({
+                   url:"http://localhost:9595/brs/api/executebrs/{bankAccountNo}/{date}",
+                   method:"GET",
+                   data: JSON.stringify(markers),
+                   dataType: "json",
+                   encode: true,
+                   processData: false,
+                   headers: {
+                       'Content-Type': "application/json"
+                   },
+                   success: function(data){
+                    alert("New record is successfully added!");  
+                    }
+               })
+       });
+     */
+       
+    /*    $.ajax
+       ({
+         type: "GET",
+         url: "http://localhost:9595/brs/api/executebrs/{bankAccountNo}/{date}",
+         dataType: 'json',
+         bankAccountNo: bankAccountNo,
+         date: date,
+         data: '{ "comment" }',
+         success: function (){
+           alert('Thanks for your comment!'); 
+         }
+       }); */
+    
+    </script>
+
+
+
+							
+					<div class="popup" id="popup-1">
+						<div class=overlay></div>
+							<div class=content>
+								<div class="close-btn">&times;</div>
+								<h1>Title</h1>
+								<p>BRS process has been started.</p>
+								
+							
+						</div>
+					</div>
+					
+				</form>
+				
+				
+				
+				 <form method="GET">
+      <input type="number" name="bankAccountNo" id="bankAccountNo" class="text"/>
+      <input type="date" name="date" id="date" class="text"/>
+      <input type="submit" name="sub" value="Submit" class="page"/>
+</form>
+					<button class="btn-submit" onclick="togglePopup()">Show Popup</button>
+			</div>
+		</div>
+	</div>
+
+
+
+	<script>
+		$(function() {
+			$('[data-toggle="popover"]').popover()
+		})
+		
+
+	/* 	$(function togglePopup(){
+			document.getElementById("popup-1").classList.toggle("active");
+		}) */
+	</script>
+
+
+	  <div>
+	 <dialog id="DialogExample">
+        <p>
+          Here is some text for example.
+        </p>
+	 <button id="hide">Close dialog text</button>
+      </dialog>
+      <button id="show">Go...</button>
+	 </div>
+	<script type="text/JavaScript">
+      (function() { var dialog = document.getElementById('popup-1'); document.getElementById('show').onclick = function() { dialog.show(); }; document.getElementById('hide').onclick = function() { dialog.close(); }; })();
+    </script>
+
+</body>
+
+<script>
+
+function togglePopup(){
+	/* document.queryselector('.overlay').clssList.add("active"); */
+	document.getElementById("popup-1").classList.toggle("active");
+}
+
+
+
+
+</script>
+
+
+
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ -->

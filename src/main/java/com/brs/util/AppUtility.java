@@ -1,0 +1,67 @@
+package com.brs.util;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.brs.batch.BrsDataItemReader;
+import com.brs.batch.unreconreader.BrsInfo;
+import com.brs.batch.updateunqref.UpdateUnqRef;
+import com.brs.entities.BrsConsoldtStg;
+import com.brs.service.BrsBankStmtHeaderService;
+import com.brs.service.BrsDataService;
+
+@Component
+public class AppUtility {
+	
+	Logger log = LoggerFactory.getLogger(AppUtility.class);
+	
+	@Autowired
+	private BrsDataService service;
+	
+	@Autowired
+	private BrsBankStmtHeaderService bnkHdrService;
+	
+	public static String bankAccountNo=null;
+	public static String voucherDate=null;
+	
+	
+	public static List<BrsInfo> newRecList=new ArrayList<BrsInfo>();
+	public static List<BrsInfo> unreconRecList=new ArrayList<BrsInfo>();
+	public static List<UpdateUnqRef> updateUnqRefList=new ArrayList<UpdateUnqRef>();
+	public static List<String> resetBankAccList=new ArrayList<String>();
+	public static List<Long> nullRecList=new ArrayList<Long>();
+	public static List<String> bnkStmtHdrList=new ArrayList<String>();
+	
+	
+	
+	public void initializeAppData() {
+//		resetBankAccList=bnkHdrService.getListOfBankAccountNumber();
+//		bnkStmtHdrList=service.getBankAccountNumberList();
+//		updateUnqRefList=service.getBrsRecordsWithNoUnqRefSummary(AppUtility.bankAccountNo, AppUtility.voucherDate, AppUtility.voucherDate);
+//		nullRecList=service.getBrsRecordsWithNoBankDetails(AppUtility.voucherDate, AppUtility.voucherDate,AppUtility.bankAccountNo, AppUtility.voucherDate, AppUtility.voucherDate);
+////		newRecList=service.getBrsRecordsWithBnkNumAndUnqRefSummary("N",AppUtility.bankAccountNo, AppUtility.voucherDate);
+//		unreconRecList=service.getBrsUnreconciledRecordsWithBnkNumAndUnqRefSummary("R",AppUtility.bankAccountNo, AppUtility.voucherDate, AppUtility.voucherDate);
+//	
+//		log.info("AppUtility initializeAppData resetBankAccList : "+resetBankAccList.size()+" bnkStmtHdrList : "+bnkStmtHdrList.size()+" updateUnqRefList : "+updateUnqRefList.size()+" nullRecList : "+nullRecList.size()+" newRecList : "+newRecList.size()+" unreconRecList : "+unreconRecList.size());
+	}
+	
+	
+	public void resetAppData() {
+//		resetBankAccList.clear();
+//		bnkStmtHdrList.clear();
+//		updateUnqRefList.clear();
+//		nullRecList.clear();
+//		newRecList.clear();
+//		unreconRecList.clear();
+//		log.info("AppUtility resetAppData resetBankAccList : "+resetBankAccList.size()+" bnkStmtHdrList : "+bnkStmtHdrList.size()+" updateUnqRefList : "+updateUnqRefList.size()+" nullRecList : "+nullRecList.size()+" newRecList : "+newRecList.size()+" unreconRecList : "+unreconRecList.size());
+	}
+	
+	
+	
+	
+}

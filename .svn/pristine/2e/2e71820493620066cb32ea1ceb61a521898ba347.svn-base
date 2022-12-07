@@ -1,0 +1,11 @@
+package com.brs.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.brs.entities.BrsBankStmtHeaderStg;
+
+@Repository
+public interface BrsBankStmtHeaderRepository extends JpaRepository<BrsBankStmtHeaderStg, Long> {
+
+}

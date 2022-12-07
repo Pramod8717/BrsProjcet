@@ -1,0 +1,89 @@
+package com.brs.batch;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.brs.batch.unreconreader.BrsInfo;
+import com.brs.batch.updateunqref.UpdateUnqRef;
+import com.brs.entities.BrsConsoldtStg;
+import com.brs.entities.BrsError;
+import com.brs.repository.BrsErrorRepository;
+import com.brs.service.BrsDataService;
+import com.brs.service.BrsErrorService;
+import com.brs.util.AppUtility;
+import com.brs.util.BrsDataUtil;
+
+@Component
+public class BrsDataItemReader implements ItemReader<BrsConsoldtStg> {
+
+	@Autowired
+	private BrsDataService service;
+	
+	Logger log = LoggerFactory.getLogger(BrsDataItemReader.class);
+	
+	@Autowired
+	private BrsDataUtil util;
+	
+	@Autowired
+	private BrsErrorService errorService;
+	
+	List<BrsInfo> brsInfoList=new ArrayList<BrsInfo>();
+	
+	int totalRecords=0;
+	int index=0;
+	
+	public void init() {
+		brsInfoList=service.getBrsRecordsWithBnkNumAndUnqRefSummary("N",AppUtility.bankAccountNo, AppUtility.voucherDate);
+		if(brsInfoList!=null&&!brsInfoList.isEmpty()) {
+			totalRecords=brsInfoList.size();
+			index=0;
+		}
+		log.info("BrsDataItemReader init totalRecords "+totalRecords+" Index value : "+index);
+	}
+	
+	public void reset() {
+		brsInfoList.clear();
+		totalRecords=0;
+		index=0;
+	}
+
+
+	@Override
+	public BrsConsoldtStg read() {
+		try {
+			
+			if(index==0&&totalRecords==0) {
+				init();
+			}
+		
+			if(index<totalRecords) {
+				BrsInfo brsInfo=brsInfoList.get(index);
+				log.info("BrsDataItemReader Bank Account Num/Unique Ref :  "+brsInfo.getBank_Account_No()+" / "+brsInfo.getunique_reference()+" Index value : "+index);
+				index++;
+				return service.getBrsRecordsWithBnkNumAndUnqRef(brsInfo.getBank_Account_No(), brsInfo.getunique_reference());
+			}else {
+				reset();
+				return null;
+			}
+			
+		}catch(Exception e) {
+			Long refId=null;
+			String bankAcNo="";
+			String uniqueRefNo="";
+			
+			BrsError error=util.getErrorDetails("BrsDataItemReader", refId, bankAcNo, uniqueRefNo, "Exception");
+			errorService.saveError(error);
+			log.error(error.toString(), e);
+			return null;
+		}
+	}
+	
+	
+
+}

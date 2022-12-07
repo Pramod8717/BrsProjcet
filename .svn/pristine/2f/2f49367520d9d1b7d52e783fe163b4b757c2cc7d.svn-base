@@ -1,0 +1,52 @@
+package com.brs.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.brs.entities.BrsConsoldtStg;
+import com.brs.repository.BrsConsoldtStgRepository;
+
+@Service
+public class BrsDataServiceImpl implements BrsDataService {
+
+	@Autowired
+	private BrsConsoldtStgRepository repo;
+
+	@Override
+	public BrsConsoldtStg getBrsConsoldtStgData() {
+		return repo.getBrsConsoldtStgData();
+	}
+
+	@Override
+	public List<BrsConsoldtStg> getOtherRecords(String paymentMode, String uniqueRefNo) {
+		List<BrsConsoldtStg> otherRecordsList = null;
+		if ("Cheque".equalsIgnoreCase(paymentMode)) {
+			otherRecordsList = repo.getBrsChequeRecords(uniqueRefNo);
+		} else if ("DD".equalsIgnoreCase(paymentMode)) {
+			otherRecordsList = repo.getBrsDDRecords(uniqueRefNo);
+		} else if ("Fund Transfer".equalsIgnoreCase(paymentMode)) {
+			otherRecordsList = repo.getBrsFundTransferRecords(uniqueRefNo);
+		} else if ("CASH".equalsIgnoreCase(paymentMode)) {
+			otherRecordsList = repo.getBrsCashRecords(uniqueRefNo);
+		}
+		return otherRecordsList;
+	}
+
+	@Override
+	public List<BrsConsoldtStg> getBrsRecordsByChequeId(long chequeId) {
+		return repo.getBrsRecordsByChequeId(chequeId);
+	}
+
+	@Override
+	public List<BrsConsoldtStg> getBrsRecordstoUpdateRefId(long chequeId, String bankAcNum) {
+		return repo.getBrsRecordstoUpdateRefId(chequeId, bankAcNum);
+	}
+
+	@Override
+	public List<BrsConsoldtStg> updateBrsData(List<BrsConsoldtStg> brsList) {
+		return repo.saveAllAndFlush(brsList);
+	}
+
+}
